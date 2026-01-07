@@ -469,128 +469,59 @@ export default function FirstAidResults({
           </Card>
         )}
 
-        <Card className="shadow-lg">
-          <CardContent className="p-4">
-            <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-              <Hospital className="w-5 h-5 text-primary" />
-              Nearby Hospitals (Govt & Private)
-            </h2>
+        <div className="space-y-2">
+          <h2 className="text-lg font-bold flex items-center gap-2 border-b-2 border-primary pb-1">
+            <Hospital className="w-5 h-5 text-primary" />
+            NEARBY HOSPITALS
+          </h2>
+          <p className="text-sm text-muted-foreground">Based on your current GPS location</p>
+          <Button
+            className="w-full py-6 text-lg font-bold bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={() => {
+              if (location) {
+                window.open(
+                  `https://www.google.com/maps/search/hospitals/@${location.latitude},${location.longitude},14z`,
+                  "_blank"
+                );
+              }
+            }}
+            disabled={!location}
+            data-testid="button-find-hospitals"
+          >
+            <MapPin className="w-5 h-5 mr-2" />
+            <div className="text-left">
+              <div>FIND HOSPITALS</div>
+              <div className="text-xs font-normal opacity-90">Opens Google Maps with your location</div>
+            </div>
+          </Button>
+        </div>
 
-            {nearbyPlaces.isLoading ? (
-              <div className="flex items-center justify-center py-8 text-muted-foreground">
-                <Loader2 className="w-6 h-6 animate-spin mr-2" />
-                <span>Searching for hospitals...</span>
-              </div>
-            ) : nearbyPlaces.error ? (
-              <div className="flex items-center gap-2 p-4 bg-destructive/10 rounded-xl text-destructive">
-                <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                <span>{nearbyPlaces.error}</span>
-              </div>
-            ) : nearbyPlaces.hospitals.length === 0 ? (
-              <p className="text-muted-foreground text-center py-4">No hospitals found nearby</p>
-            ) : (
-              <div className="space-y-3">
-                {nearbyPlaces.hospitals.slice(0, 5).map((hospital, index) => {
-                  const ownership = (hospital as any).ownership;
-                  const facilityType = (hospital as any).facilityType;
-                  return (
-                    <div 
-                      key={index}
-                      className="p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-border"
-                      data-testid={`card-hospital-${index}`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap mb-1">
-                            <h3 className="font-bold truncate" data-testid={`text-hospital-name-${index}`}>
-                              {hospital.name}
-                            </h3>
-                            {ownership && ownership !== "Unknown" && (
-                              <span className={`text-xs px-2 py-0.5 rounded-full ${
-                                ownership === "Government" 
-                                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300" 
-                                  : "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300"
-                              }`}>
-                                {ownership}
-                              </span>
-                            )}
-                            {facilityType && (
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-                                {facilityType}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground truncate">{hospital.address}</p>
-                          <p className="text-sm font-medium text-primary mt-1">{hospital.distance}</p>
-                        </div>
-                        <Button
-                          size="sm"
-                          onClick={() => openDirections(hospital)}
-                          data-testid={`button-hospital-directions-${index}`}
-                        >
-                          <ExternalLink className="w-4 h-4 mr-1" />
-                          Open in Maps
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-lg">
-          <CardContent className="p-4">
-            <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-              <Store className="w-5 h-5 text-blue-600" />
-              Find Medical Stores Nearby
-            </h2>
-
-            {nearbyPlaces.isLoading ? (
-              <div className="flex items-center justify-center py-8 text-muted-foreground">
-                <Loader2 className="w-6 h-6 animate-spin mr-2" />
-                <span>Searching for medical stores...</span>
-              </div>
-            ) : nearbyPlaces.error ? (
-              <div className="flex items-center gap-2 p-4 bg-destructive/10 rounded-xl text-destructive">
-                <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                <span>{nearbyPlaces.error}</span>
-              </div>
-            ) : nearbyPlaces.medicalStores.length === 0 ? (
-              <p className="text-muted-foreground text-center py-4">No medical stores found nearby</p>
-            ) : (
-              <div className="space-y-3">
-                {nearbyPlaces.medicalStores.slice(0, 5).map((store, index) => (
-                  <div 
-                    key={index}
-                    className="p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-border"
-                    data-testid={`card-medical-store-${index}`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold truncate" data-testid={`text-medical-store-name-${index}`}>
-                          {store.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground truncate">{store.address}</p>
-                        <p className="text-sm font-medium text-blue-600 mt-1">{store.distance}</p>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => openDirections(store)}
-                        data-testid={`button-medical-store-directions-${index}`}
-                      >
-                        <ExternalLink className="w-4 h-4 mr-1" />
-                        Open in Maps
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <div className="space-y-2">
+          <h2 className="text-lg font-bold flex items-center gap-2 border-b-2 border-primary pb-1">
+            <Store className="w-5 h-5 text-primary" />
+            MEDICAL SHOPS
+          </h2>
+          <p className="text-sm text-muted-foreground">Find first-aid supplies nearby</p>
+          <Button
+            className="w-full py-6 text-lg font-bold bg-green-600 hover:bg-green-700 text-white"
+            onClick={() => {
+              if (location) {
+                window.open(
+                  `https://www.google.com/maps/search/pharmacy+medical+store/@${location.latitude},${location.longitude},14z`,
+                  "_blank"
+                );
+              }
+            }}
+            disabled={!location}
+            data-testid="button-find-pharmacies"
+          >
+            <MapPin className="w-5 h-5 mr-2" />
+            <div className="text-left">
+              <div>FIND PHARMACIES</div>
+              <div className="text-xs font-normal opacity-90">Opens Google Maps with your location</div>
+            </div>
+          </Button>
+        </div>
 
         <div className="text-center text-xs text-muted-foreground p-4 bg-muted/30 rounded-xl">
           <p className="font-semibold mb-1">Important Notice</p>
