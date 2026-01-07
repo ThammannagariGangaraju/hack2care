@@ -72,6 +72,60 @@ const SAMPLE_PHARMACIES: NearbyPlace[] = [
   }
 ];
 
+// Generate basic first aid guide based on answers - INSTANT, no API needed
+function getBasicFirstAidGuide(answers: DecisionAnswers): FirstAidResponse {
+  const needsCPR = answers.isConscious === false && answers.isBreathing === false;
+  const hasBleeding = answers.hasHeavyBleeding === true;
+  const isUnconscious = answers.isConscious === false;
+  
+  let instructions: string[] = [];
+  let priority: 'critical' | 'urgent' | 'moderate' = 'moderate';
+
+  if (needsCPR) {
+    priority = 'critical';
+    instructions = [
+      "Call 108 for ambulance IMMEDIATELY",
+      "Check airway - tilt head back, lift chin",
+      "Begin CPR if trained - 30 chest compressions",
+      "Give 2 rescue breaths after compressions",
+      "Continue CPR until help arrives"
+    ];
+  } else if (isUnconscious) {
+    priority = 'urgent';
+    instructions = [
+      "Call 108 for ambulance immediately",
+      "Place person in recovery position (on their side)",
+      "Keep airway clear and monitor breathing",
+      "Do NOT move them unless in danger",
+      "Stay with them until help arrives"
+    ];
+  } else if (hasBleeding) {
+    priority = 'urgent';
+    instructions = [
+      "Call 108 for ambulance",
+      "Apply firm pressure to the wound with clean cloth",
+      "Keep pressing - do not remove the cloth",
+      "If blood soaks through, add more cloth on top",
+      "Keep the injured area raised if possible"
+    ];
+  } else {
+    priority = 'moderate';
+    instructions = [
+      "Call 108 if medical help is needed",
+      "Keep the person calm and still",
+      "Do NOT move them unless in immediate danger",
+      "Check for any other injuries",
+      "Stay with them until help arrives"
+    ];
+  }
+
+  return {
+    instructions,
+    showCPR: needsCPR,
+    priority
+  };
+}
+
 function App() {
   const [appState, setAppState] = useState<AppState>("home");
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -203,60 +257,38 @@ function App() {
     if (currentQuestion < 2) {
       setCurrentQuestion(prev => prev + 1);
     } else {
-      // All questions answered, get first aid instructions
+      // All questions answered - IMMEDIATELY show basic steps (no loading)
       setAppState("results");
-      setIsLoading(true);
+      
+      // Create basic offline guide based on answers - shown IMMEDIATELY
+      const basicGuide = getBasicFirstAidGuide(newAnswers);
+      setFirstAidData(basicGuide);
+      setIsLoading(false); // No loading - instant display
 
-      // Log emergency to backend
-      try {
-        await apiRequest("POST", "/api/emergencies", {
-          latitude: location?.latitude,
-          longitude: location?.longitude,
-          emergencyType: "road_accident",
-          isConscious: String(newAnswers.isConscious),
-          isBreathing: String(newAnswers.isBreathing),
-          hasHeavyBleeding: String(newAnswers.hasHeavyBleeding)
-        });
-      } catch (error) {
-        console.error('Error logging emergency:', error);
-      }
+      // Log emergency to backend (in background)
+      apiRequest("POST", "/api/emergencies", {
+        latitude: location?.latitude,
+        longitude: location?.longitude,
+        emergencyType: "road_accident",
+        isConscious: String(newAnswers.isConscious),
+        isBreathing: String(newAnswers.isBreathing),
+        hasHeavyBleeding: String(newAnswers.hasHeavyBleeding)
+      }).catch(error => console.error('Error logging emergency:', error));
 
-      // Get AI first aid instructions
-      if (isOffline) {
-        // Use offline guide with CPR if needed
-        const offlineGuide = { ...OFFLINE_FIRST_AID };
-        if (newAnswers.isConscious === false && newAnswers.isBreathing === false) {
-          offlineGuide.showCPR = true;
-          offlineGuide.priority = 'critical';
-          offlineGuide.instructions = [
-            "This is a CRITICAL emergency - the patient needs CPR",
-            "Call 108 immediately if you haven't already",
-            "Begin CPR if you are trained (see animation below)",
-            "Continue CPR until help arrives or patient starts breathing",
-            ...offlineGuide.instructions.slice(1)
-          ];
-        }
-        setFirstAidData(offlineGuide);
-        setIsLoading(false);
-      } else {
-        try {
-          const response = await apiRequest("POST", "/api/first-aid", {
-            isConscious: newAnswers.isConscious,
-            isBreathing: newAnswers.isBreathing,
-            hasHeavyBleeding: newAnswers.hasHeavyBleeding
-          });
+      // If online, fetch enhanced AI steps in background and update
+      if (!isOffline) {
+        apiRequest("POST", "/api/first-aid", {
+          isConscious: newAnswers.isConscious,
+          isBreathing: newAnswers.isBreathing,
+          hasHeavyBleeding: newAnswers.hasHeavyBleeding
+        }).then(async (response) => {
           const data = await response.json();
+          // Update with AI-enhanced instructions
           setFirstAidData(data as FirstAidResponse);
-        } catch (error) {
-          console.error('Error getting first aid instructions:', error);
-          // Fall back to offline guide
-          const offlineGuide = { ...OFFLINE_FIRST_AID };
-          if (newAnswers.isConscious === false && newAnswers.isBreathing === false) {
-            offlineGuide.showCPR = true;
-          }
-          setFirstAidData(offlineGuide);
-        }
-        setIsLoading(false);
+        }).catch(error => {
+          console.error('Error getting AI first aid:', error);
+          // Keep basic guide on error
+        });
       }
     }
   }, [answers, currentQuestion, isOffline, location]);

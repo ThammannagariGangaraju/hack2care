@@ -16,11 +16,9 @@ import {
   ArrowLeft,
   RefreshCw,
   ExternalLink,
-  Loader2,
   WifiOff,
   Info,
-  ChevronLeft,
-  ChevronRight
+  Loader2
 } from "lucide-react";
 import type { DecisionAnswers, FirstAidResponse, LocationData, NearbyPlace } from "@shared/schema";
 import CPRAnimation from "@/components/cpr-animation";
@@ -209,12 +207,12 @@ export default function FirstAidResults({
           </a>
         </div>
 
-        {/* First Aid Instructions - Horizontal Tabs */}
+        {/* First Aid Instructions - Simple Step Display */}
         <Card className="shadow-xl border-2 border-red-800/30">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4 gap-2">
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <CheckCircle2 className="w-6 h-6 text-red-700" />
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3 gap-2">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-red-700" />
                 First Aid Steps
               </h2>
               <Button 
@@ -224,32 +222,25 @@ export default function FirstAidResults({
                 data-testid="button-toggle-speech"
               >
                 {isSpeaking ? (
-                  <Volume2 className="w-6 h-6 text-red-600 animate-pulse" />
+                  <Volume2 className="w-5 h-5 text-red-600 animate-pulse" />
                 ) : (
-                  <VolumeX className="w-6 h-6 text-muted-foreground" />
+                  <VolumeX className="w-5 h-5 text-muted-foreground" />
                 )}
               </Button>
             </div>
 
-            {isLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-8 h-8 animate-spin text-red-600" />
-                <span className="ml-3 text-muted-foreground">Getting AI guidance...</span>
-              </div>
-            ) : totalSteps > 0 ? (
-              <div className="space-y-4">
-                {/* Step Tabs */}
-                <div className="flex gap-2 overflow-x-auto pb-2">
+            {totalSteps > 0 ? (
+              <div className="space-y-3">
+                {/* Step Tabs - Tap to navigate */}
+                <div className="flex justify-center gap-2">
                   {instructions.map((_, index) => (
                     <button
                       key={index}
                       onClick={() => setCurrentStep(index)}
-                      className={`flex-shrink-0 w-10 h-10 rounded-full font-bold text-lg transition-all ${
+                      className={`w-9 h-9 rounded-full font-bold text-base transition-all ${
                         index === currentStep
-                          ? 'bg-red-700 text-white dark:bg-red-800'
-                          : index < currentStep
-                          ? 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
-                          : 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500'
+                          ? 'bg-red-700 text-white dark:bg-red-800 scale-110'
+                          : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
                       }`}
                       data-testid={`button-step-${index}`}
                     >
@@ -258,51 +249,29 @@ export default function FirstAidResults({
                   ))}
                 </div>
 
-                {/* Current Step Content */}
+                {/* Current Step Content - Swipeable area */}
                 <div 
-                  className="min-h-32 p-6 rounded-xl bg-gray-50 dark:bg-gray-900 border-2 border-red-700/20"
+                  className="min-h-28 p-5 rounded-xl bg-gray-50 dark:bg-gray-900 border border-red-700/20"
                   data-testid={`text-instruction-${currentStep}`}
+                  onClick={() => setCurrentStep(prev => prev < totalSteps - 1 ? prev + 1 : 0)}
                 >
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-700 dark:bg-red-800 flex items-center justify-center">
-                      <span className="text-white font-bold text-xl">{currentStep + 1}</span>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-700 dark:bg-red-800 flex items-center justify-center">
+                      <span className="text-white font-bold text-lg">{currentStep + 1}</span>
                     </div>
-                    <p className="text-lg leading-relaxed pt-2 flex-1">
+                    <p className="text-base leading-relaxed pt-1.5 flex-1">
                       {instructions[currentStep]}
                     </p>
                   </div>
                 </div>
 
-                {/* Navigation Buttons */}
-                <div className="flex justify-between gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => setCurrentStep(prev => Math.max(0, prev - 1))}
-                    disabled={currentStep === 0}
-                    className="flex-1 h-14 text-base"
-                    data-testid="button-prev-step"
-                  >
-                    <ChevronLeft className="w-5 h-5 mr-2" />
-                    Previous
-                  </Button>
-                  <Button
-                    onClick={() => setCurrentStep(prev => Math.min(totalSteps - 1, prev + 1))}
-                    disabled={currentStep === totalSteps - 1}
-                    className="flex-1 h-14 text-base bg-red-700 hover:bg-red-800 dark:bg-red-800 dark:hover:bg-red-900"
-                    data-testid="button-next-step"
-                  >
-                    Next
-                    <ChevronRight className="w-5 h-5 ml-2" />
-                  </Button>
-                </div>
-
-                {/* Step Progress */}
-                <p className="text-center text-sm text-muted-foreground">
-                  Step {currentStep + 1} of {totalSteps}
+                {/* Tap hint */}
+                <p className="text-center text-xs text-muted-foreground">
+                  Tap step to continue ({currentStep + 1}/{totalSteps})
                 </p>
               </div>
             ) : (
-              <p className="text-muted-foreground text-center py-4">No instructions available</p>
+              <p className="text-muted-foreground text-center py-4">Loading steps...</p>
             )}
           </CardContent>
         </Card>
