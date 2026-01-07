@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import cprImage from "@assets/stock_images/cpr_chest_compressio_30f3aa3d.jpg";
+import cprImage from "@assets/image_1767781394467.png";
 
 export default function CPRAnimation() {
   const [count, setCount] = useState(1);
@@ -45,56 +45,55 @@ export default function CPRAnimation() {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative w-full max-w-md rounded-2xl overflow-hidden mb-4">
-        <img 
-          src={cprImage} 
-          alt="CPR chest compressions demonstration"
-          className="w-full h-auto object-cover"
-        />
-        
+      <div className="relative w-full max-w-md bg-white dark:bg-gray-100 rounded-2xl overflow-hidden mb-4 p-4">
         <div 
-          className={`absolute inset-0 transition-all duration-100 ${
-            isCompressing 
-              ? 'bg-red-500/20' 
-              : 'bg-transparent'
-          }`}
-        />
-        
-        <div 
-          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-100 ${
-            isCompressing ? 'scale-110 opacity-100' : 'scale-100 opacity-60'
-          }`}
+          className="relative transition-transform duration-100 ease-out"
+          style={{
+            transform: isCompressing ? 'scale(1.02) translateY(2px)' : 'scale(1) translateY(0px)'
+          }}
         >
-          <div className={`w-20 h-20 rounded-full border-4 flex items-center justify-center ${
-            isCompressing 
-              ? 'border-red-500 bg-red-500/30' 
-              : 'border-white/50 bg-white/20'
-          }`}>
-            <svg 
-              className={`w-10 h-10 transition-transform duration-100 ${isCompressing ? 'translate-y-1' : ''}`}
-              viewBox="0 0 24 24" 
-              fill="none"
-            >
-              <path 
-                d="M12 4L12 20M12 20L6 14M12 20L18 14" 
-                stroke={isCompressing ? "#dc2626" : "white"} 
-                strokeWidth="3" 
-                strokeLinecap="round" 
-                strokeLinejoin="round"
-              />
-            </svg>
+          <img 
+            src={cprImage} 
+            alt="CPR chest compressions demonstration showing proper hand position"
+            className="w-full h-auto object-contain"
+          />
+          
+          <div 
+            className={`absolute top-[45%] left-[35%] w-12 h-12 transition-all duration-100 ${
+              isCompressing ? 'opacity-100 scale-110' : 'opacity-0 scale-100'
+            }`}
+          >
+            <div className="w-full h-full rounded-full bg-red-500/40 animate-ping" />
           </div>
+          
+          {isCompressing && (
+            <div className="absolute top-[30%] left-[35%] flex flex-col items-center">
+              <svg 
+                className="w-8 h-8 text-red-500 animate-bounce"
+                viewBox="0 0 24 24" 
+                fill="none"
+              >
+                <path 
+                  d="M12 4L12 20M12 20L6 14M12 20L18 14" 
+                  stroke="currentColor" 
+                  strokeWidth="3" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+          )}
         </div>
 
-        <div className={`absolute bottom-3 left-3 px-4 py-2 rounded-full text-base font-bold transition-all duration-100 ${
+        <div className={`absolute bottom-2 left-2 px-3 py-1.5 rounded-full text-sm font-bold transition-all duration-100 ${
           isCompressing 
-            ? 'bg-red-600 text-white scale-105' 
-            : 'bg-white/90 text-gray-700 dark:bg-gray-800 dark:text-gray-200'
+            ? 'bg-red-600 text-white' 
+            : 'bg-gray-200 text-gray-700'
         }`}>
           {isCompressing ? 'PUSH!' : 'RELEASE'}
         </div>
 
-        <div className="absolute top-3 right-3 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
+        <div className="absolute top-2 right-2 bg-black/70 text-white px-3 py-1 rounded-full text-sm font-medium">
           {formatTime(totalSeconds)}
         </div>
       </div>
