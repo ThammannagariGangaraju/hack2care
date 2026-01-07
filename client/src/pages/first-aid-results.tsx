@@ -466,44 +466,52 @@ export default function FirstAidResults({
             <Hospital className="w-4 h-4 text-blue-400" />
             Find Help Nearby
           </h2>
-          <button
-            className="w-full py-4 rounded-xl bg-gradient-to-r from-blue-500 to-blue-700 text-white font-bold shadow-lg shadow-blue-900/30 flex items-center justify-center gap-2 disabled:opacity-50"
-            onClick={() => {
-              if (location) {
-                window.open(
-                  `https://www.google.com/maps/search/hospitals/@${location.latitude},${location.longitude},14z`,
-                  "_blank"
-                );
-              }
-            }}
-            disabled={!location}
-            data-testid="button-find-hospitals"
-          >
-            <Hospital className="w-5 h-5" />
-            <div className="text-left">
-              <div className="text-sm">FIND HOSPITALS</div>
-              <div className="text-xs font-normal opacity-80">Opens Google Maps</div>
+          {location ? (
+            <a
+              href={`https://www.google.com/maps/search/hospitals/@${location.latitude},${location.longitude},14z`}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="button-find-hospitals"
+              className="w-full py-4 rounded-xl bg-gradient-to-r from-blue-500 to-blue-700 text-white font-bold shadow-lg shadow-blue-900/30 flex items-center justify-center gap-2 touch-manipulation cursor-pointer"
+            >
+              <Hospital className="w-5 h-5" />
+              <div className="text-left">
+                <div className="text-sm">FIND HOSPITALS</div>
+                <div className="text-xs font-normal opacity-80">Opens Google Maps</div>
+              </div>
+            </a>
+          ) : (
+            <div className="w-full py-4 rounded-xl bg-slate-700/50 text-slate-400 font-bold flex items-center justify-center gap-2 opacity-50">
+              <Hospital className="w-5 h-5" />
+              <div className="text-left">
+                <div className="text-sm">FIND HOSPITALS</div>
+                <div className="text-xs font-normal opacity-80">Waiting for location...</div>
+              </div>
             </div>
-          </button>
-          <button
-            className="w-full py-4 rounded-xl bg-gradient-to-r from-green-500 to-green-700 text-white font-bold shadow-lg shadow-green-900/30 flex items-center justify-center gap-2 disabled:opacity-50"
-            onClick={() => {
-              if (location) {
-                window.open(
-                  `https://www.google.com/maps/search/pharmacy+medical+store/@${location.latitude},${location.longitude},14z`,
-                  "_blank"
-                );
-              }
-            }}
-            disabled={!location}
-            data-testid="button-find-pharmacies"
-          >
-            <Store className="w-5 h-5" />
-            <div className="text-left">
-              <div className="text-sm">FIND PHARMACIES</div>
-              <div className="text-xs font-normal opacity-80">Opens Google Maps</div>
+          )}
+          {location ? (
+            <a
+              href={`https://www.google.com/maps/search/pharmacy+medical+store/@${location.latitude},${location.longitude},14z`}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="button-find-pharmacies"
+              className="w-full py-4 rounded-xl bg-gradient-to-r from-green-500 to-green-700 text-white font-bold shadow-lg shadow-green-900/30 flex items-center justify-center gap-2 touch-manipulation cursor-pointer"
+            >
+              <Store className="w-5 h-5" />
+              <div className="text-left">
+                <div className="text-sm">FIND PHARMACIES</div>
+                <div className="text-xs font-normal opacity-80">Opens Google Maps</div>
+              </div>
+            </a>
+          ) : (
+            <div className="w-full py-4 rounded-xl bg-slate-700/50 text-slate-400 font-bold flex items-center justify-center gap-2 opacity-50">
+              <Store className="w-5 h-5" />
+              <div className="text-left">
+                <div className="text-sm">FIND PHARMACIES</div>
+                <div className="text-xs font-normal opacity-80">Waiting for location...</div>
+              </div>
             </div>
-          </button>
+          )}
         </div>
 
         {/* Disclaimer */}
