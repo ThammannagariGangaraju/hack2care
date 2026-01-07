@@ -230,7 +230,7 @@ export default function FirstAidResults({
               </div>
             ) : (
               <ul className="space-y-4">
-                {firstAidData?.instructions.map((instruction, index) => (
+                {(firstAidData?.instructions || []).map((instruction, index) => (
                   <li 
                     key={index} 
                     className="flex items-start gap-3 text-lg"
