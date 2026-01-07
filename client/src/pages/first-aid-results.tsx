@@ -52,8 +52,9 @@ export default function FirstAidResults({
 
   // Auto-voice: Read instructions aloud when they appear
   useEffect(() => {
-    if (firstAidData && !hasSpoken && 'speechSynthesis' in window) {
-      const text = firstAidData.instructions.join('. ');
+    const instructions = firstAidData?.instructions;
+    if (instructions && instructions.length > 0 && !hasSpoken && 'speechSynthesis' in window) {
+      const text = instructions.join('. ');
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 0.9;
       utterance.pitch = 1;
@@ -82,12 +83,13 @@ export default function FirstAidResults({
   }, [firstAidData, hasSpoken]);
 
   const toggleSpeech = () => {
+    const instructions = firstAidData?.instructions;
     if ('speechSynthesis' in window) {
       if (isSpeaking) {
         window.speechSynthesis.cancel();
         setIsSpeaking(false);
-      } else if (firstAidData) {
-        const text = firstAidData.instructions.join('. ');
+      } else if (instructions && instructions.length > 0) {
+        const text = instructions.join('. ');
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.rate = 0.9;
         utterance.onstart = () => setIsSpeaking(true);
