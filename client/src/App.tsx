@@ -245,7 +245,8 @@ function App() {
             isBreathing: newAnswers.isBreathing,
             hasHeavyBleeding: newAnswers.hasHeavyBleeding
           });
-          setFirstAidData(response as FirstAidResponse);
+          const data = await response.json();
+          setFirstAidData(data as FirstAidResponse);
         } catch (error) {
           console.error('Error getting first aid instructions:', error);
           // Fall back to offline guide
