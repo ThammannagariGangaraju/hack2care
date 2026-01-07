@@ -207,7 +207,7 @@ export default function FirstAidResults({
           </a>
         </div>
 
-        {/* First Aid Instructions - Simple Step Display */}
+        {/* First Aid Instructions - Simple List */}
         <Card className="shadow-xl border-2 border-red-800/30">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-3 gap-2">
@@ -231,44 +231,22 @@ export default function FirstAidResults({
 
             {totalSteps > 0 ? (
               <div className="space-y-3">
-                {/* Step Tabs - Tap to navigate */}
-                <div className="flex justify-center gap-2">
-                  {instructions.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentStep(index)}
-                      className={`w-9 h-9 rounded-full font-bold text-base transition-all ${
-                        index === currentStep
-                          ? 'bg-red-700 text-white dark:bg-red-800 scale-110'
-                          : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
-                      }`}
-                      data-testid={`button-step-${index}`}
-                    >
-                      {index + 1}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Current Step Content - Swipeable area */}
-                <div 
-                  className="min-h-28 p-5 rounded-xl bg-gray-50 dark:bg-gray-900 border border-red-700/20"
-                  data-testid={`text-instruction-${currentStep}`}
-                  onClick={() => setCurrentStep(prev => prev < totalSteps - 1 ? prev + 1 : 0)}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-700 dark:bg-red-800 flex items-center justify-center">
-                      <span className="text-white font-bold text-lg">{currentStep + 1}</span>
+                {instructions.map((instruction, index) => (
+                  <div 
+                    key={index}
+                    className="p-4 rounded-xl bg-gray-50 dark:bg-gray-900 border border-red-700/20"
+                    data-testid={`text-instruction-${index}`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-red-700 dark:bg-red-800 flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">{index + 1}</span>
+                      </div>
+                      <p className="text-base leading-relaxed pt-1 flex-1">
+                        {instruction}
+                      </p>
                     </div>
-                    <p className="text-base leading-relaxed pt-1.5 flex-1">
-                      {instructions[currentStep]}
-                    </p>
                   </div>
-                </div>
-
-                {/* Tap hint */}
-                <p className="text-center text-xs text-muted-foreground">
-                  Tap step to continue ({currentStep + 1}/{totalSteps})
-                </p>
+                ))}
               </div>
             ) : (
               <p className="text-muted-foreground text-center py-4">Loading steps...</p>
