@@ -1,0 +1,144 @@
+Project Name: HACK2CARE – AI First-Responder Assistant
+
+You are building a MOBILE-OPTIMIZED EMERGENCY WEB APPLICATION for road accident bystanders. 
+This is NOT a demo app. This is a safety-critical emergency assistance system.
+
+Your output MUST strictly follow the requirements below. 
+Do NOT simplify, skip, or reinterpret any rule.
+
+--------------------------------------------------
+CORE OBJECTIVE
+--------------------------------------------------
+Build a fast, panic-safe, mobile-first web application that helps bystanders provide immediate first aid during road accidents using Google Gemini AI, location sharing, and emergency communication.
+
+--------------------------------------------------
+MANDATORY TECH STACK
+--------------------------------------------------
+Frontend:
+- HTML, CSS, JavaScript
+- Mobile-first design (portrait mode only)
+- High-visibility emergency theme (Red, White, Yellow)
+- Large, easy-to-tap buttons
+
+Backend:
+- Python (Flask) OR Node.js (Express)
+
+APIs:
+- Google Gemini API (first-aid logic only)
+- Google Maps API (location + nearby hospitals & medical shops)
+- Firebase (logging emergencies only – placeholders allowed)
+
+--------------------------------------------------
+UI & ENTRY FLOW (STRICT)
+--------------------------------------------------
+1. NO LOGIN. NO SIGNUP. NO AUTHENTICATION.
+2. Landing page must contain ONLY ONE PRIMARY ELEMENT:
+   - A massive button labeled: “REPORT ACCIDENT”
+3. This button must be immediately tappable.
+
+--------------------------------------------------
+DECISION TREE LOGIC (STRICT ORDER)
+--------------------------------------------------
+After clicking “REPORT ACCIDENT”, ask ONLY these 3 Yes/No questions in this order:
+1. Is the patient conscious?
+2. Is the patient breathing normally?
+3. Is there heavy bleeding?
+
+No additional questions are allowed.
+
+--------------------------------------------------
+CPR SAFETY LOGIC (NON-NEGOTIABLE)
+--------------------------------------------------
+CPR guidance MUST be shown ONLY IF:
+- Patient is unconscious
+AND
+- Patient is NOT breathing normally
+
+If the patient IS breathing:
+- CPR MUST NEVER be shown.
+
+If CPR is shown:
+- Display a simple CPR GIF/animation
+- Show calm rhythm/count guidance
+- Clearly display: “Begin CPR only if you are trained”
+- Do NOT mention compression depth, force, or medical terms
+
+--------------------------------------------------
+GEMINI AI INTEGRATION (STRICT)
+--------------------------------------------------
+Send ONLY the 3 decision answers to Gemini.
+
+Gemini MUST:
+- Return ONLY 3–4 short bullet points
+- Use very simple language
+- Give ONLY basic first-aid steps
+- NEVER give diagnosis
+- NEVER suggest medicines or dosages
+- NEVER replace doctors or ambulances
+
+If Gemini fails or internet is unavailable:
+- Show a hardcoded “Standard First Aid Guide” instantly
+
+--------------------------------------------------
+AUTO VOICE (MANDATORY)
+--------------------------------------------------
+As soon as first-aid steps appear:
+- Automatically read them aloud using Web Speech API
+- Calm, clear, slow voice
+- No user action required
+
+--------------------------------------------------
+EMERGENCY COMMUNICATION
+--------------------------------------------------
+1. Show “Call Ambulance (108)” – PRIMARY
+2. Show “Call Police (112)” – SECONDARY
+- Open phone dialer with number pre-filled
+- User must manually confirm the call
+
+--------------------------------------------------
+LOCATION SHARING & ALERTS
+--------------------------------------------------
+- Fetch GPS location immediately
+- Generate Google Maps location link
+- Show a WhatsApp button that creates this message:
+
+“EMERGENCY! I am at an accident site. My location: [Google Maps Link]. Need help!”
+
+--------------------------------------------------
+NEARBY HELP (IMPORTANT)
+--------------------------------------------------
+Using Google Maps API:
+- Show 3 nearest hospitals (priority)
+- Show nearby medical shops/pharmacies (supportive)
+Medical shops are ONLY for basic first-aid supplies.
+Do NOT suggest medicines.
+
+Provide a fallback button:
+- “Open in Google Maps”
+
+--------------------------------------------------
+OFFLINE SUPPORT (MANDATORY)
+--------------------------------------------------
+Implement a Service Worker.
+If offline:
+- App must still load
+- Show cached Standard First Aid Guide
+- Emergency calling must still work
+
+--------------------------------------------------
+FIREBASE LOGGING (MANDATORY)
+--------------------------------------------------
+Log to Firebase collection: “emergencies”
+Fields:
+- timestamp
+- GPS coordinates
+- emergency type
+Use placeholder Firebase config.
+
+--------------------------------------------------
+PERFORMANCE & UX RULES
+--------------------------------------------------
+- No heavy animations
+- No delays before showing first aid
+- First aid must appear within seconds
+- Emergency actions ...
