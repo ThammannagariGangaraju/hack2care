@@ -289,203 +289,185 @@ export default function FirstAidResults({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-red-50 via-white to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-900 pb-6">
-      {/* Emergency Header Bar */}
-      <div className="bg-red-600 text-white py-1.5 px-4 text-center">
-        <span className="font-bold text-xs tracking-wide">EMERGENCY FIRST AID GUIDE</span>
-      </div>
-
-      <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm p-3 border-b border-red-200 dark:border-red-900 flex items-center gap-3">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pb-6">
+      {/* Header */}
+      <header className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-sm px-4 py-3 border-b border-slate-700/50 flex items-center gap-3">
         <Button 
-          variant="outline" 
+          variant="ghost" 
           size="icon" 
           onClick={onBack}
           data-testid="button-back-results"
-          className="border-red-300 dark:border-red-800"
+          className="text-slate-400 hover:text-white hover:bg-slate-700"
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <img src={logoImage} alt="hack2care" className="w-10 h-10 object-contain" />
         <div className="flex-1">
-          <h1 className="font-bold text-base text-red-700 dark:text-red-400">Emergency First Aid</h1>
-          <p className="text-xs text-muted-foreground">Follow these steps carefully</p>
+          <h1 className="text-white font-bold text-sm">Emergency First Aid</h1>
+          <p className="text-slate-500 text-xs">Follow these steps carefully</p>
         </div>
         <Button 
-          variant="outline" 
+          variant="ghost" 
           size="icon" 
           onClick={onRestart}
           data-testid="button-restart"
-          className="border-red-300 dark:border-red-800"
+          className="text-slate-400 hover:text-white hover:bg-slate-700"
         >
           <RefreshCw className="w-5 h-5" />
         </Button>
       </header>
 
       {isOffline && (
-        <div className="bg-accent/20 border-b border-accent/30 p-3 flex items-center justify-center gap-2">
-          <WifiOff className="w-5 h-5 text-accent-foreground" />
-          <span className="font-medium text-accent-foreground">Offline Mode - Showing Standard First Aid Guide</span>
+        <div className="bg-amber-900/30 border-b border-amber-700/30 p-2 flex items-center justify-center gap-2">
+          <WifiOff className="w-4 h-4 text-amber-400" />
+          <span className="text-xs font-medium text-amber-400">Offline Mode - Standard First Aid Guide</span>
         </div>
       )}
 
-      <main className="p-4 space-y-6 max-w-lg mx-auto">
-        <div className="space-y-3">
+      <main className="p-4 space-y-4 max-w-lg mx-auto">
+        {/* Emergency Call Buttons */}
+        <div className="grid grid-cols-2 gap-3">
           <a 
             href="tel:108"
             data-testid="button-call-ambulance"
-            className="flex items-center justify-between w-full h-20 px-6 rounded-2xl bg-primary text-primary-foreground font-bold text-xl"
+            className="flex flex-col items-center justify-center py-4 rounded-xl bg-gradient-to-br from-red-500 to-red-700 text-white font-bold shadow-lg shadow-red-900/30"
           >
-            <div className="flex items-center gap-3">
-              <Phone className="w-7 h-7" />
-              <span>Call Ambulance</span>
-            </div>
-            <span className="text-2xl">108</span>
+            <Phone className="w-6 h-6 mb-1" />
+            <span className="text-sm">Ambulance</span>
+            <span className="text-lg">108</span>
           </a>
           <a 
             href="tel:112"
             data-testid="button-call-police"
-            className="flex items-center justify-between w-full h-16 px-6 rounded-xl bg-secondary text-secondary-foreground font-semibold text-lg"
+            className="flex flex-col items-center justify-center py-4 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white font-bold shadow-lg shadow-blue-900/30"
           >
-            <div className="flex items-center gap-3">
-              <Phone className="w-6 h-6" />
-              <span>Call Police</span>
-            </div>
-            <span className="text-xl">112</span>
+            <Phone className="w-6 h-6 mb-1" />
+            <span className="text-sm">Police</span>
+            <span className="text-lg">112</span>
           </a>
         </div>
 
-        <Card className="shadow-xl border-2 border-red-800/30">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-3 gap-2">
-              <h2 className="text-lg font-bold flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-red-700" />
-                First Aid Steps
-              </h2>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={toggleSpeech}
-                data-testid="button-toggle-speech"
-              >
-                {isSpeaking ? (
-                  <Volume2 className="w-5 h-5 text-red-600 animate-pulse" />
-                ) : (
-                  <VolumeX className="w-5 h-5 text-muted-foreground" />
-                )}
-              </Button>
-            </div>
+        {/* First Aid Steps Card */}
+        <div className="rounded-xl bg-slate-800/50 border border-slate-700/50 p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-white font-bold flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-green-400" />
+              First Aid Steps
+            </h2>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleSpeech}
+              data-testid="button-toggle-speech"
+              className="text-slate-400 hover:text-white hover:bg-slate-700"
+            >
+              {isSpeaking ? (
+                <Volume2 className="w-5 h-5 text-red-400 animate-pulse" />
+              ) : (
+                <VolumeX className="w-5 h-5" />
+              )}
+            </Button>
+          </div>
 
-            {totalSteps > 0 ? (
-              <div className="space-y-3">
-                {instructions.map((instruction, index) => (
-                  <div 
-                    key={index}
-                    className="p-4 rounded-xl bg-gray-50 dark:bg-gray-900 border border-red-700/20"
-                    data-testid={`text-instruction-${index}`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-red-700 dark:bg-red-800 flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">{index + 1}</span>
-                      </div>
-                      <p className="text-base leading-relaxed pt-1 flex-1">
-                        {instruction}
-                      </p>
+          {totalSteps > 0 ? (
+            <div className="space-y-3">
+              {instructions.map((instruction, index) => (
+                <div 
+                  key={index}
+                  className="p-3 rounded-lg bg-slate-900/50 border border-slate-700/30"
+                  data-testid={`text-instruction-${index}`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center">
+                      <span className="text-white font-bold text-xs">{index + 1}</span>
                     </div>
+                    <p className="text-slate-200 text-sm leading-relaxed flex-1">
+                      {instruction}
+                    </p>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-muted-foreground text-center py-4">Loading steps...</p>
-            )}
-          </CardContent>
-        </Card>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-slate-500 text-center py-4 text-sm">Loading steps...</p>
+          )}
+        </div>
 
         {showCPR && (
-          <Card className="shadow-xl border-2 border-destructive/30">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2 mb-4 p-3 bg-destructive/10 rounded-xl">
-                <AlertTriangle className="w-6 h-6 text-destructive" />
-                <span className="font-bold text-destructive">Begin CPR only if you are trained</span>
-              </div>
-              
-              <CPRAnimation />
-            </CardContent>
-          </Card>
-        )}
-
-        <Card className="shadow-lg">
-          <CardContent className="p-6">
-            <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
-              <MapPin className="w-6 h-6 text-primary" />
-              Share Your Location
-            </h2>
-            <p className="text-muted-foreground mb-4 flex items-center gap-2">
-              <Info className="w-4 h-4" />
-              Tap below to send your location to contacts for help
-            </p>
-
-            {location && (
-              <Button
-                variant="outline"
-                className="w-full h-14 mb-4 text-base"
-                onClick={openCurrentLocationInMaps}
-                data-testid="button-view-my-location"
-              >
-                <Navigation className="w-5 h-5 mr-2" />
-                View My Current Location in Maps
-              </Button>
-            )}
-            
-            <div className="grid grid-cols-2 gap-3">
-              <a 
-                href={getWhatsAppLink()}
-                target="_blank"
-                rel="noopener noreferrer"
-                data-testid="button-share-whatsapp"
-                className="flex flex-col items-center justify-center gap-2 h-24 rounded-xl bg-green-600 text-white font-semibold text-lg"
-              >
-                <MessageCircle className="w-8 h-8" />
-                <span>WhatsApp</span>
-              </a>
-              <a 
-                href={getSMSLink()}
-                data-testid="button-share-sms"
-                className="flex flex-col items-center justify-center gap-2 h-24 rounded-xl bg-blue-600 text-white font-semibold text-lg"
-              >
-                <MessageSquare className="w-8 h-8" />
-                <span>SMS</span>
-              </a>
+          <div className="rounded-xl bg-red-900/30 border border-red-700/50 p-4">
+            <div className="flex items-center gap-2 mb-4 p-3 bg-red-900/50 rounded-lg">
+              <AlertTriangle className="w-5 h-5 text-red-400" />
+              <span className="font-bold text-red-300 text-sm">Begin CPR only if you are trained</span>
             </div>
-            <p className="text-center text-sm text-muted-foreground mt-3">
-              Both options will include your GPS location link
-            </p>
-          </CardContent>
-        </Card>
-
-        {location && (
-          <Card className="shadow-lg">
-            <CardContent className="p-4">
-              <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-primary" />
-                Your Location
-              </h2>
-              <div 
-                ref={mapRef} 
-                className="w-full h-48 rounded-xl overflow-hidden border border-border"
-                data-testid="map-container"
-              />
-            </CardContent>
-          </Card>
+            <CPRAnimation />
+          </div>
         )}
 
-        <div className="space-y-2">
-          <h2 className="text-lg font-bold flex items-center gap-2 border-b-2 border-primary pb-1">
-            <Hospital className="w-5 h-5 text-primary" />
-            NEARBY HOSPITALS
+        {/* Share Location Section */}
+        <div className="rounded-xl bg-slate-800/50 border border-slate-700/50 p-4">
+          <h2 className="text-white font-bold mb-2 flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-blue-400" />
+            Share Your Location
           </h2>
-          <p className="text-sm text-muted-foreground">Based on your current GPS location</p>
-          <Button
-            className="w-full py-6 text-lg font-bold bg-blue-600 hover:bg-blue-700 text-white"
+          <p className="text-slate-400 text-xs mb-4">Send your location to contacts for help</p>
+
+          {location && (
+            <Button
+              variant="outline"
+              className="w-full h-12 mb-3 text-sm bg-slate-700/50 border-slate-600 text-white hover:bg-slate-700"
+              onClick={openCurrentLocationInMaps}
+              data-testid="button-view-my-location"
+            >
+              <Navigation className="w-4 h-4 mr-2" />
+              View My Location in Maps
+            </Button>
+          )}
+          
+          <div className="grid grid-cols-2 gap-3">
+            <a 
+              href={getWhatsAppLink()}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="button-share-whatsapp"
+              className="flex flex-col items-center justify-center gap-1 py-4 rounded-xl bg-gradient-to-br from-green-500 to-green-700 text-white font-semibold shadow-lg shadow-green-900/30"
+            >
+              <MessageCircle className="w-6 h-6" />
+              <span className="text-sm">WhatsApp</span>
+            </a>
+            <a 
+              href={getSMSLink()}
+              data-testid="button-share-sms"
+              className="flex flex-col items-center justify-center gap-1 py-4 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white font-semibold shadow-lg shadow-blue-900/30"
+            >
+              <MessageSquare className="w-6 h-6" />
+              <span className="text-sm">SMS</span>
+            </a>
+          </div>
+        </div>
+
+        {/* Map Section */}
+        {location && (
+          <div className="rounded-xl bg-slate-800/50 border border-slate-700/50 p-4">
+            <h2 className="text-white font-bold mb-3 flex items-center gap-2 text-sm">
+              <MapPin className="w-4 h-4 text-blue-400" />
+              Your Location
+            </h2>
+            <div 
+              ref={mapRef} 
+              className="w-full h-44 rounded-lg overflow-hidden border border-slate-700/50"
+              data-testid="map-container"
+            />
+          </div>
+        )}
+
+        {/* Find Help Section */}
+        <div className="space-y-3">
+          <h2 className="text-white font-bold flex items-center gap-2 text-sm">
+            <Hospital className="w-4 h-4 text-blue-400" />
+            Find Help Nearby
+          </h2>
+          <button
+            className="w-full py-4 rounded-xl bg-gradient-to-r from-blue-500 to-blue-700 text-white font-bold shadow-lg shadow-blue-900/30 flex items-center justify-center gap-2 disabled:opacity-50"
             onClick={() => {
               if (location) {
                 window.open(
@@ -497,22 +479,14 @@ export default function FirstAidResults({
             disabled={!location}
             data-testid="button-find-hospitals"
           >
-            <MapPin className="w-5 h-5 mr-2" />
+            <Hospital className="w-5 h-5" />
             <div className="text-left">
-              <div>FIND HOSPITALS</div>
-              <div className="text-xs font-normal opacity-90">Opens Google Maps with your location</div>
+              <div className="text-sm">FIND HOSPITALS</div>
+              <div className="text-xs font-normal opacity-80">Opens Google Maps</div>
             </div>
-          </Button>
-        </div>
-
-        <div className="space-y-2">
-          <h2 className="text-lg font-bold flex items-center gap-2 border-b-2 border-primary pb-1">
-            <Store className="w-5 h-5 text-primary" />
-            MEDICAL SHOPS
-          </h2>
-          <p className="text-sm text-muted-foreground">Find first-aid supplies nearby</p>
-          <Button
-            className="w-full py-6 text-lg font-bold bg-green-600 hover:bg-green-700 text-white"
+          </button>
+          <button
+            className="w-full py-4 rounded-xl bg-gradient-to-r from-green-500 to-green-700 text-white font-bold shadow-lg shadow-green-900/30 flex items-center justify-center gap-2 disabled:opacity-50"
             onClick={() => {
               if (location) {
                 window.open(
@@ -524,17 +498,18 @@ export default function FirstAidResults({
             disabled={!location}
             data-testid="button-find-pharmacies"
           >
-            <MapPin className="w-5 h-5 mr-2" />
+            <Store className="w-5 h-5" />
             <div className="text-left">
-              <div>FIND PHARMACIES</div>
-              <div className="text-xs font-normal opacity-90">Opens Google Maps with your location</div>
+              <div className="text-sm">FIND PHARMACIES</div>
+              <div className="text-xs font-normal opacity-80">Opens Google Maps</div>
             </div>
-          </Button>
+          </button>
         </div>
 
-        <div className="text-center text-xs text-muted-foreground p-4 bg-muted/30 rounded-xl">
-          <p className="font-semibold mb-1">Important Notice</p>
-          <p>This app provides general first aid guidance only and does not replace professional medical care. Always call emergency services for serious injuries.</p>
+        {/* Disclaimer */}
+        <div className="text-center text-xs text-slate-500 p-4 bg-slate-800/30 rounded-xl border border-slate-700/30">
+          <p className="font-semibold text-slate-400 mb-1">Important Notice</p>
+          <p>This app provides general first aid guidance only and does not replace professional medical care.</p>
         </div>
       </main>
     </div>
