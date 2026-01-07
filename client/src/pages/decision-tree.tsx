@@ -52,9 +52,8 @@ export default function DecisionTree({ currentQuestion, answers, onAnswer, onBac
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <div className="relative">
-          <div className="absolute inset-0 bg-blue-500/30 rounded-full blur-sm animate-pulse" />
-          <img src={logoImage} alt="hack2care" className="w-10 h-10 object-contain relative z-10" style={{ animation: 'pulse-glow 2s ease-in-out infinite' }} />
+        <div className="w-10 h-10 rounded-lg bg-slate-800 border border-slate-600/50 flex items-center justify-center p-1 shadow-sm">
+          <img src={logoImage} alt="hack2care" className="w-full h-full object-contain" />
         </div>
         <div className="flex-1">
           <h1 className="text-white font-bold text-sm">Quick Assessment</h1>
