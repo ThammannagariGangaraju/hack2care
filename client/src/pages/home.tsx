@@ -24,11 +24,17 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3 border-b border-slate-700/50">
         <div className="flex items-center gap-3">
-          <img 
-            src={logoImage} 
-            alt="hack2care" 
-            className="w-12 h-12 object-contain"
-          />
+          <div className="relative">
+            <div className="absolute inset-0 bg-blue-500/30 rounded-full blur-md animate-pulse" />
+            <img 
+              src={logoImage} 
+              alt="hack2care" 
+              className="w-12 h-12 object-contain relative z-10 animate-[pulse-glow_2s_ease-in-out_infinite]"
+              style={{
+                animation: 'pulse-glow 2s ease-in-out infinite'
+              }}
+            />
+          </div>
           <div>
             <h1 className="text-white font-bold text-lg tracking-tight">hack2care</h1>
             <p className="text-slate-400 text-xs">AI First-Responder</p>

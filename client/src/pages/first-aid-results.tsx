@@ -301,7 +301,10 @@ export default function FirstAidResults({
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <img src={logoImage} alt="hack2care" className="w-10 h-10 object-contain" />
+        <div className="relative">
+          <div className="absolute inset-0 bg-blue-500/30 rounded-full blur-sm animate-pulse" />
+          <img src={logoImage} alt="hack2care" className="w-10 h-10 object-contain relative z-10" style={{ animation: 'pulse-glow 2s ease-in-out infinite' }} />
+        </div>
         <div className="flex-1">
           <h1 className="text-white font-bold text-sm">Emergency First Aid</h1>
           <p className="text-slate-500 text-xs">Follow these steps carefully</p>

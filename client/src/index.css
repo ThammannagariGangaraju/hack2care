@@ -286,3 +286,15 @@
     inset: -1px;
   }
 }
+
+/* Logo pulse glow animation */
+@keyframes pulse-glow {
+  0%, 100% {
+    transform: scale(1);
+    filter: brightness(1) drop-shadow(0 0 0px rgba(59, 130, 246, 0));
+  }
+  50% {
+    transform: scale(1.05);
+    filter: brightness(1.1) drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+  }
+}
