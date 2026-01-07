@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Check, X, ArrowLeft } from "lucide-react";
 import type { DecisionAnswers } from "@shared/schema";
+import logoImage from "@assets/image_1767781744439.png";
 
 interface DecisionTreeProps {
   currentQuestion: number;
@@ -40,27 +41,34 @@ export default function DecisionTree({ currentQuestion, answers, onAnswer, onBac
   if (!question) return null;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-red-50 via-white to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-900 flex flex-col">
+      {/* Emergency Header Bar */}
+      <div className="bg-red-600 text-white py-1.5 px-4 text-center">
+        <span className="font-bold text-xs tracking-wide">EMERGENCY ASSESSMENT</span>
+      </div>
+
       {/* Header */}
-      <header className="p-4 border-b border-border flex items-center gap-4">
+      <header className="p-3 border-b border-red-200 dark:border-red-900 flex items-center gap-3 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
         <Button 
-          variant="ghost" 
+          variant="outline" 
           size="icon" 
           onClick={onBack}
           data-testid="button-back"
+          className="border-red-300 dark:border-red-800"
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
+        <img src={logoImage} alt="hack2care" className="w-10 h-10 object-contain" />
         <div className="flex-1">
-          <h1 className="font-bold text-lg">Quick Assessment</h1>
-          <p className="text-sm text-muted-foreground">Question {currentQuestion + 1} of 3</p>
+          <h1 className="font-bold text-base text-red-700 dark:text-red-400">Quick Assessment</h1>
+          <p className="text-xs text-muted-foreground">Question {currentQuestion + 1} of 3</p>
         </div>
       </header>
 
       {/* Progress Bar */}
-      <div className="h-2 bg-muted">
+      <div className="h-2 bg-red-100 dark:bg-red-950">
         <div 
-          className="h-full bg-primary transition-all duration-300"
+          className="h-full bg-red-600 transition-all duration-300"
           style={{ width: `${((currentQuestion + 1) / 3) * 100}%` }}
         />
       </div>

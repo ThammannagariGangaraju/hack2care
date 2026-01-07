@@ -27,6 +27,7 @@ import type { DecisionAnswers, FirstAidResponse, LocationData, NearbyPlace } fro
 import CPRAnimation from "@/components/cpr-animation";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import logoImage from "@assets/image_1767781744439.png";
 
 interface FirstAidResultsProps {
   answers: DecisionAnswers;
@@ -288,25 +289,33 @@ export default function FirstAidResults({
   };
 
   return (
-    <div className="min-h-screen bg-background pb-6">
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm p-4 border-b border-border flex items-center gap-4">
+    <div className="min-h-screen bg-gradient-to-b from-red-50 via-white to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-900 pb-6">
+      {/* Emergency Header Bar */}
+      <div className="bg-red-600 text-white py-1.5 px-4 text-center">
+        <span className="font-bold text-xs tracking-wide">EMERGENCY FIRST AID GUIDE</span>
+      </div>
+
+      <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm p-3 border-b border-red-200 dark:border-red-900 flex items-center gap-3">
         <Button 
-          variant="ghost" 
+          variant="outline" 
           size="icon" 
           onClick={onBack}
           data-testid="button-back-results"
+          className="border-red-300 dark:border-red-800"
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
+        <img src={logoImage} alt="hack2care" className="w-10 h-10 object-contain" />
         <div className="flex-1">
-          <h1 className="font-bold text-lg">Emergency First Aid</h1>
-          <p className="text-sm text-muted-foreground">Follow these steps carefully</p>
+          <h1 className="font-bold text-base text-red-700 dark:text-red-400">Emergency First Aid</h1>
+          <p className="text-xs text-muted-foreground">Follow these steps carefully</p>
         </div>
         <Button 
-          variant="ghost" 
+          variant="outline" 
           size="icon" 
           onClick={onRestart}
           data-testid="button-restart"
+          className="border-red-300 dark:border-red-800"
         >
           <RefreshCw className="w-5 h-5" />
         </Button>

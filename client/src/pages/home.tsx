@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Phone, MapPin, Heart, Shield } from "lucide-react";
+import { AlertTriangle, Phone, MapPin, Shield } from "lucide-react";
 import type { LocationData } from "@shared/schema";
+import logoImage from "@assets/image_1767781744439.png";
 
 interface HomePageProps {
   onStartEmergency: () => void;
@@ -20,14 +21,22 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5 flex flex-col">
-      {/* Header */}
-      <header className="p-4 text-center border-b border-border/50">
-        <div className="flex items-center justify-center gap-2 mb-1">
-          <Heart className="w-8 h-8 text-primary fill-primary" />
-          <h1 className="text-3xl font-bold tracking-tight">HACK2CARE</h1>
+    <div className="min-h-screen bg-gradient-to-b from-red-50 via-white to-red-50 dark:from-gray-950 dark:via-gray-900 dark:to-red-950/20 flex flex-col">
+      {/* Emergency Header Bar */}
+      <div className="bg-red-600 text-white py-2 px-4 text-center animate-pulse">
+        <span className="font-bold text-sm tracking-wide">EMERGENCY FIRST AID ASSISTANT</span>
+      </div>
+
+      {/* Header with Logo */}
+      <header className="p-4 text-center">
+        <div className="flex flex-col items-center justify-center gap-2">
+          <img 
+            src={logoImage} 
+            alt="hack2care logo" 
+            className="w-24 h-24 object-contain"
+          />
+          <p className="text-muted-foreground text-sm">AI-Powered Emergency Response</p>
         </div>
-        <p className="text-muted-foreground text-lg">AI First-Responder Assistant</p>
       </header>
 
       {/* Main Content */}
@@ -66,15 +75,17 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
         <button
           onClick={onStartEmergency}
           data-testid="button-report-accident"
-          className="w-full max-w-lg h-40 rounded-3xl bg-primary text-primary-foreground font-bold text-3xl uppercase tracking-wider shadow-2xl border-4 border-primary-border transition-all duration-200 flex flex-col items-center justify-center gap-3 relative overflow-hidden"
+          className="w-full max-w-lg h-44 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-bold text-3xl uppercase tracking-wider shadow-2xl border-4 border-red-800 transition-all duration-200 flex flex-col items-center justify-center gap-3 relative overflow-hidden"
           style={{ transform: `scale(${pulseScale})` }}
         >
           {/* Animated pulse ring */}
-          <div className="absolute inset-0 rounded-3xl animate-ping bg-primary/20 pointer-events-none" style={{ animationDuration: '2s' }} />
+          <div className="absolute inset-0 rounded-2xl animate-ping bg-red-400/30 pointer-events-none" style={{ animationDuration: '1.5s' }} />
           
-          <AlertTriangle className="w-12 h-12" />
-          <span>Report Accident</span>
-          <span className="text-sm font-normal opacity-80">Tap to get immediate help</span>
+          <div className="bg-white/20 p-3 rounded-full mb-1">
+            <AlertTriangle className="w-12 h-12" />
+          </div>
+          <span className="text-2xl">REPORT ACCIDENT</span>
+          <span className="text-sm font-normal opacity-90">Tap here for immediate help</span>
         </button>
 
         {/* Location Status */}
@@ -87,22 +98,22 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
 
         {/* Emergency Numbers */}
         <div className="w-full max-w-lg space-y-3">
-          <p className="text-center text-sm text-muted-foreground mb-2">Quick Emergency Calls</p>
+          <p className="text-center text-sm font-semibold text-red-700 dark:text-red-400 mb-2">Emergency Helplines</p>
           <div className="grid grid-cols-2 gap-3">
             <a 
               href="tel:108" 
               data-testid="button-call-ambulance-home"
-              className="flex items-center justify-center gap-2 p-4 rounded-xl bg-primary/10 border border-primary/20 text-foreground font-semibold"
+              className="flex items-center justify-center gap-2 p-4 rounded-xl bg-red-100 dark:bg-red-900/30 border-2 border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 font-bold"
             >
-              <Phone className="w-5 h-5 text-primary" />
+              <Phone className="w-5 h-5" />
               <span>Ambulance 108</span>
             </a>
             <a 
               href="tel:112" 
               data-testid="button-call-police-home"
-              className="flex items-center justify-center gap-2 p-4 rounded-xl bg-accent/10 border border-accent/20 text-foreground font-semibold"
+              className="flex items-center justify-center gap-2 p-4 rounded-xl bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-300 dark:border-blue-800 text-blue-700 dark:text-blue-300 font-bold"
             >
-              <Phone className="w-5 h-5 text-accent-foreground" />
+              <Phone className="w-5 h-5" />
               <span>Police 112</span>
             </a>
           </div>
@@ -110,8 +121,8 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
       </main>
 
       {/* Footer */}
-      <footer className="p-4 text-center text-xs text-muted-foreground border-t border-border/50">
-        <p>This app does not replace professional medical care. Always call emergency services.</p>
+      <footer className="p-4 text-center text-xs text-muted-foreground bg-gray-100 dark:bg-gray-900 border-t border-red-200 dark:border-red-900">
+        <p className="font-medium">This app provides guidance only. Always call professional emergency services.</p>
       </footer>
     </div>
   );
