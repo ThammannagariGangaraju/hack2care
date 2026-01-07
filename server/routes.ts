@@ -4,6 +4,19 @@ import { storage } from "./storage";
 import { GoogleGenAI } from "@google/genai";
 import { insertEmergencySchema } from "@shared/schema";
 
+// Helper function to calculate distance between two points
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): string {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const distance = R * c;
+  return distance < 1 ? `${Math.round(distance * 1000)} m` : `${distance.toFixed(1)} km`;
+}
+
 // Initialize Gemini AI client using Replit AI Integrations
 const ai = new GoogleGenAI({
   apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY || "",
@@ -124,16 +137,57 @@ Respond with ONLY a JSON object in this exact format (no markdown, no code block
     }
   });
 
-  // Get nearby places (hospitals and pharmacies)
-  // In production, this would use Google Maps API
+  // Get nearby places (hospitals and pharmacies) using Google Maps Places API
   app.get("/api/nearby-places", async (req, res) => {
     try {
       const { lat, lng } = req.query;
       const latitude = parseFloat(lat as string) || 28.6139;
       const longitude = parseFloat(lng as string) || 77.2090;
+      
+      const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
+      
+      // If Google Maps API key is available, use real Places API
+      if (GOOGLE_MAPS_API_KEY) {
+        try {
+          const [hospitalsResponse, pharmaciesResponse] = await Promise.all([
+            fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=5000&type=hospital&key=${GOOGLE_MAPS_API_KEY}`),
+            fetch(`https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=5000&type=pharmacy&key=${GOOGLE_MAPS_API_KEY}`)
+          ]);
+          
+          const hospitalsData = await hospitalsResponse.json();
+          const pharmaciesData = await pharmaciesResponse.json();
+          
+          const hospitals = (hospitalsData.results || []).slice(0, 5).map((place: any) => ({
+            name: place.name,
+            address: place.vicinity || place.formatted_address || "Address not available",
+            distance: calculateDistance(latitude, longitude, place.geometry.location.lat, place.geometry.location.lng),
+            latitude: place.geometry.location.lat,
+            longitude: place.geometry.location.lng,
+            type: "hospital",
+            rating: place.rating || null,
+            openNow: place.opening_hours?.open_now ?? null
+          }));
+          
+          const pharmacies = (pharmaciesData.results || []).slice(0, 5).map((place: any) => ({
+            name: place.name,
+            address: place.vicinity || place.formatted_address || "Address not available",
+            distance: calculateDistance(latitude, longitude, place.geometry.location.lat, place.geometry.location.lng),
+            latitude: place.geometry.location.lat,
+            longitude: place.geometry.location.lng,
+            type: "pharmacy",
+            rating: place.rating || null,
+            openNow: place.opening_hours?.open_now ?? null
+          }));
+          
+          res.json({ hospitals, pharmacies });
+          return;
+        } catch (apiError) {
+          console.error("Google Maps API error:", apiError);
+          // Fall through to sample data
+        }
+      }
 
-      // In a real implementation, this would call Google Maps Places API
-      // For now, we generate realistic-looking sample data based on location
+      // Fallback to sample data if no API key or API fails
       const hospitals = [
         {
           name: "City General Hospital",
