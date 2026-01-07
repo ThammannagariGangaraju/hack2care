@@ -19,7 +19,9 @@ import {
   Info,
   Loader2,
   ExternalLink,
-  AlertCircle
+  AlertCircle,
+  Store,
+  Building2
 } from "lucide-react";
 import type { DecisionAnswers, FirstAidResponse, LocationData, NearbyPlace } from "@shared/schema";
 import CPRAnimation from "@/components/cpr-animation";
@@ -39,6 +41,7 @@ interface FirstAidResultsProps {
 interface NearbyPlacesState {
   hospitals: NearbyPlace[];
   pharmacies: NearbyPlace[];
+  medicalStores: NearbyPlace[];
   isLoading: boolean;
   error: string | null;
 }
@@ -62,6 +65,7 @@ export default function FirstAidResults({
   const [nearbyPlaces, setNearbyPlaces] = useState<NearbyPlacesState>({
     hospitals: [],
     pharmacies: [],
+    medicalStores: [],
     isLoading: true,
     error: null
   });
@@ -101,6 +105,7 @@ export default function FirstAidResults({
         setNearbyPlaces({
           hospitals: data.hospitals || [],
           pharmacies: data.pharmacies || [],
+          medicalStores: data.medicalStores || [],
           isLoading: false,
           error: null
         });
@@ -109,6 +114,7 @@ export default function FirstAidResults({
         setNearbyPlaces({
           hospitals: [],
           pharmacies: [],
+          medicalStores: [],
           isLoading: false,
           error: error instanceof Error ? error.message : "Network error"
         });
@@ -177,15 +183,29 @@ export default function FirstAidResults({
       iconAnchor: [6, 6]
     });
 
+    const medicalStoreIcon = L.divIcon({
+      html: '<div style="background: #2563eb; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>',
+      className: "medical-store-marker",
+      iconSize: [12, 12],
+      iconAnchor: [6, 6]
+    });
+
     nearbyPlaces.hospitals.forEach((hospital) => {
+      const ownershipLabel = (hospital as any).ownership ? ` (${(hospital as any).ownership})` : "";
       const marker = L.marker([hospital.latitude, hospital.longitude], { icon: hospitalIcon })
-        .bindPopup(`<b>${hospital.name}</b><br>${hospital.address}<br>${hospital.distance}`);
+        .bindPopup(`<b>${hospital.name}</b>${ownershipLabel}<br>${hospital.address}<br>${hospital.distance}`);
       markersLayerRef.current?.addLayer(marker);
     });
 
     nearbyPlaces.pharmacies.forEach((pharmacy) => {
       const marker = L.marker([pharmacy.latitude, pharmacy.longitude], { icon: pharmacyIcon })
         .bindPopup(`<b>${pharmacy.name}</b><br>${pharmacy.address}<br>${pharmacy.distance}`);
+      markersLayerRef.current?.addLayer(marker);
+    });
+
+    nearbyPlaces.medicalStores.forEach((store) => {
+      const marker = L.marker([store.latitude, store.longitude], { icon: medicalStoreIcon })
+        .bindPopup(`<b>${store.name}</b><br>${store.address}<br>${store.distance}`);
       markersLayerRef.current?.addLayer(marker);
     });
   }, [nearbyPlaces, location]);
@@ -483,31 +503,51 @@ export default function FirstAidResults({
               <p className="text-muted-foreground text-center py-4">No hospitals found nearby</p>
             ) : (
               <div className="space-y-3">
-                {nearbyPlaces.hospitals.slice(0, 5).map((hospital, index) => (
-                  <div 
-                    key={index}
-                    className="p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-border"
-                    data-testid={`card-hospital-${index}`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold truncate" data-testid={`text-hospital-name-${index}`}>
-                          {hospital.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground truncate">{hospital.address}</p>
-                        <p className="text-sm font-medium text-primary mt-1">{hospital.distance}</p>
+                {nearbyPlaces.hospitals.slice(0, 5).map((hospital, index) => {
+                  const ownership = (hospital as any).ownership;
+                  const facilityType = (hospital as any).facilityType;
+                  return (
+                    <div 
+                      key={index}
+                      className="p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-border"
+                      data-testid={`card-hospital-${index}`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <h3 className="font-bold truncate" data-testid={`text-hospital-name-${index}`}>
+                              {hospital.name}
+                            </h3>
+                            {ownership && ownership !== "Unknown" && (
+                              <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                ownership === "Government" 
+                                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300" 
+                                  : "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300"
+                              }`}>
+                                {ownership}
+                              </span>
+                            )}
+                            {facilityType && (
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                {facilityType}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground truncate">{hospital.address}</p>
+                          <p className="text-sm font-medium text-primary mt-1">{hospital.distance}</p>
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => openDirections(hospital)}
+                          data-testid={`button-hospital-directions-${index}`}
+                        >
+                          <ExternalLink className="w-4 h-4 mr-1" />
+                          Open in Maps
+                        </Button>
                       </div>
-                      <Button
-                        size="sm"
-                        onClick={() => openDirections(hospital)}
-                        data-testid={`button-hospital-directions-${index}`}
-                      >
-                        <ExternalLink className="w-4 h-4 mr-1" />
-                        Open in Maps
-                      </Button>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>
@@ -553,6 +593,58 @@ export default function FirstAidResults({
                         variant="secondary"
                         onClick={() => openDirections(pharmacy)}
                         data-testid={`button-pharmacy-directions-${index}`}
+                      >
+                        <ExternalLink className="w-4 h-4 mr-1" />
+                        Open in Maps
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-lg">
+          <CardContent className="p-4">
+            <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
+              <Store className="w-5 h-5 text-blue-600" />
+              Nearby Medical Stores
+            </h2>
+
+            {nearbyPlaces.isLoading ? (
+              <div className="flex items-center justify-center py-8 text-muted-foreground">
+                <Loader2 className="w-6 h-6 animate-spin mr-2" />
+                <span>Searching for medical stores...</span>
+              </div>
+            ) : nearbyPlaces.error ? (
+              <div className="flex items-center gap-2 p-4 bg-destructive/10 rounded-xl text-destructive">
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <span>{nearbyPlaces.error}</span>
+              </div>
+            ) : nearbyPlaces.medicalStores.length === 0 ? (
+              <p className="text-muted-foreground text-center py-4">No medical stores found nearby</p>
+            ) : (
+              <div className="space-y-3">
+                {nearbyPlaces.medicalStores.slice(0, 5).map((store, index) => (
+                  <div 
+                    key={index}
+                    className="p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-border"
+                    data-testid={`card-medical-store-${index}`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold truncate" data-testid={`text-medical-store-name-${index}`}>
+                          {store.name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground truncate">{store.address}</p>
+                        <p className="text-sm font-medium text-blue-600 mt-1">{store.distance}</p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => openDirections(store)}
+                        data-testid={`button-medical-store-directions-${index}`}
                       >
                         <ExternalLink className="w-4 h-4 mr-1" />
                         Open in Maps

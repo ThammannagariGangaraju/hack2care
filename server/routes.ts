@@ -162,16 +162,26 @@ Respond with ONLY a JSON object in this exact format (no markdown, no code block
       
       const radiusMeters = 5000; // 5km search radius
       
-      // Overpass API query for hospitals and pharmacies
+      // Overpass API query for hospitals, clinics, pharmacies, and medical stores
       const overpassQuery = `
         [out:json][timeout:25];
         (
           node["amenity"="hospital"](around:${radiusMeters},${latitude},${longitude});
           way["amenity"="hospital"](around:${radiusMeters},${latitude},${longitude});
-          node["amenity"="pharmacy"](around:${radiusMeters},${latitude},${longitude});
-          way["amenity"="pharmacy"](around:${radiusMeters},${latitude},${longitude});
           node["amenity"="clinic"](around:${radiusMeters},${latitude},${longitude});
           way["amenity"="clinic"](around:${radiusMeters},${latitude},${longitude});
+          node["healthcare"="hospital"](around:${radiusMeters},${latitude},${longitude});
+          way["healthcare"="hospital"](around:${radiusMeters},${latitude},${longitude});
+          node["healthcare"="clinic"](around:${radiusMeters},${latitude},${longitude});
+          way["healthcare"="clinic"](around:${radiusMeters},${latitude},${longitude});
+          node["amenity"="pharmacy"](around:${radiusMeters},${latitude},${longitude});
+          way["amenity"="pharmacy"](around:${radiusMeters},${latitude},${longitude});
+          node["shop"="chemist"](around:${radiusMeters},${latitude},${longitude});
+          way["shop"="chemist"](around:${radiusMeters},${latitude},${longitude});
+          node["healthcare"="pharmacy"](around:${radiusMeters},${latitude},${longitude});
+          way["healthcare"="pharmacy"](around:${radiusMeters},${latitude},${longitude});
+          node["shop"="medical_supply"](around:${radiusMeters},${latitude},${longitude});
+          way["shop"="medical_supply"](around:${radiusMeters},${latitude},${longitude});
         );
         out center;
       `;
@@ -196,6 +206,10 @@ Respond with ONLY a JSON object in this exact format (no markdown, no code block
       
       const hospitals: any[] = [];
       const pharmacies: any[] = [];
+      const medicalStores: any[] = [];
+      
+      // Track unique places to avoid duplicates from different tag sources
+      const seenPlaces = new Set<string>();
       
       for (const element of elements) {
         // Get coordinates (for ways, use center; for nodes, use lat/lon)
@@ -204,8 +218,38 @@ Respond with ONLY a JSON object in this exact format (no markdown, no code block
         
         if (!placeLat || !placeLon) continue;
         
+        // Create unique key to avoid duplicates
+        const placeKey = `${placeLat.toFixed(5)}_${placeLon.toFixed(5)}`;
+        if (seenPlaces.has(placeKey)) continue;
+        seenPlaces.add(placeKey);
+        
         const tags = element.tags || {};
         const amenity = tags.amenity;
+        const healthcare = tags.healthcare;
+        const shop = tags.shop;
+        
+        // Determine place type
+        const isHospital = amenity === "hospital" || healthcare === "hospital";
+        const isClinic = amenity === "clinic" || healthcare === "clinic";
+        const isPharmacy = amenity === "pharmacy" || healthcare === "pharmacy";
+        const isMedicalStore = shop === "chemist" || shop === "medical_supply";
+        
+        // Determine hospital ownership (government vs private)
+        const operator = tags.operator?.toLowerCase() || "";
+        const operatorType = tags["operator:type"]?.toLowerCase() || "";
+        const name = (tags.name || "").toLowerCase();
+        
+        let ownership = "Unknown";
+        if (operatorType.includes("government") || operatorType.includes("public") ||
+            operator.includes("government") || operator.includes("govt") ||
+            name.includes("government") || name.includes("govt") || 
+            name.includes("district") || name.includes("area hospital") ||
+            name.includes("phc") || name.includes("chc") || name.includes("taluk")) {
+          ownership = "Government";
+        } else if (operatorType.includes("private") || operator.includes("private") ||
+                   name.includes("private")) {
+          ownership = "Private";
+        }
         
         // Build address from available tags
         const addressParts = [];
@@ -218,22 +262,34 @@ Respond with ONLY a JSON object in this exact format (no markdown, no code block
           ? addressParts.join(", ")
           : tags.address || "Address not available";
         
+        // Determine display name
+        let displayName = tags.name;
+        if (!displayName) {
+          if (isPharmacy) displayName = "Pharmacy";
+          else if (isMedicalStore) displayName = shop === "chemist" ? "Chemist" : "Medical Store";
+          else if (isClinic) displayName = "Clinic";
+          else displayName = "Hospital";
+        }
+        
         const place = {
-          name: tags.name || (amenity === "pharmacy" ? "Pharmacy" : amenity === "clinic" ? "Clinic" : "Hospital"),
+          name: displayName,
           address,
           distance: calculateDistance(latitude, longitude, placeLat, placeLon),
           distanceMeters: calculateDistanceMeters(latitude, longitude, placeLat, placeLon),
           latitude: placeLat,
           longitude: placeLon,
-          type: amenity === "pharmacy" ? "pharmacy" : "hospital",
+          ownership: (isHospital || isClinic) ? ownership : undefined,
+          facilityType: isClinic ? "Clinic" : isHospital ? "Hospital" : undefined,
           phone: tags.phone || tags["contact:phone"] || null,
           website: tags.website || tags["contact:website"] || null,
           openingHours: tags.opening_hours || null
         };
         
-        if (amenity === "pharmacy") {
+        if (isPharmacy) {
           pharmacies.push(place);
-        } else {
+        } else if (isMedicalStore) {
+          medicalStores.push(place);
+        } else if (isHospital || isClinic) {
           hospitals.push(place);
         }
       }
@@ -241,16 +297,19 @@ Respond with ONLY a JSON object in this exact format (no markdown, no code block
       // Sort by distance
       hospitals.sort((a, b) => a.distanceMeters - b.distanceMeters);
       pharmacies.sort((a, b) => a.distanceMeters - b.distanceMeters);
+      medicalStores.sort((a, b) => a.distanceMeters - b.distanceMeters);
       
       // Limit to 10 each
       const limitedHospitals = hospitals.slice(0, 10);
       const limitedPharmacies = pharmacies.slice(0, 10);
+      const limitedMedicalStores = medicalStores.slice(0, 10);
       
-      console.log(`Found ${limitedHospitals.length} hospitals and ${limitedPharmacies.length} pharmacies`);
+      console.log(`Found ${limitedHospitals.length} hospitals/clinics, ${limitedPharmacies.length} pharmacies, ${limitedMedicalStores.length} medical stores`);
       
       res.json({ 
         hospitals: limitedHospitals, 
         pharmacies: limitedPharmacies,
+        medicalStores: limitedMedicalStores,
         source: "openstreetmap"
       });
       
