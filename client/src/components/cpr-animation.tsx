@@ -4,11 +4,8 @@ export default function CPRAnimation() {
   const [count, setCount] = useState(1);
   const [isCompressing, setIsCompressing] = useState(false);
   const [totalSeconds, setTotalSeconds] = useState(0);
-  const animationRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
-  // CPR rhythm: 100-120 compressions per minute = ~1.7-2 compressions per second
-  // We'll use 110 BPM = 545ms per compression
   const COMPRESSION_INTERVAL = 545;
   const COMPRESSIONS_PER_CYCLE = 30;
 
@@ -23,12 +20,10 @@ export default function CPRAnimation() {
         return prev + 1;
       });
       
-      // Animate compression
       setIsCompressing(true);
       setTimeout(() => setIsCompressing(false), COMPRESSION_INTERVAL / 2);
     }, COMPRESSION_INTERVAL);
 
-    // Update total time
     const timeInterval = setInterval(() => {
       if (startTimeRef.current) {
         setTotalSeconds(Math.floor((Date.now() - startTimeRef.current) / 1000));
@@ -49,124 +44,136 @@ export default function CPRAnimation() {
 
   return (
     <div className="flex flex-col items-center">
-      {/* CPR Animation Container */}
-      <div className="relative w-full max-w-md aspect-[4/3] bg-gradient-to-b from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 rounded-2xl overflow-hidden mb-6">
-        {/* Ground/Floor */}
-        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gray-300 dark:bg-gray-700" />
+      <div className="relative w-full max-w-md aspect-[4/3] bg-gradient-to-b from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 rounded-2xl overflow-hidden mb-6">
         
-        {/* Patient (lying down) */}
         <svg 
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
-          width="280"
-          height="60"
-          viewBox="0 0 280 60"
+          className="absolute inset-0 w-full h-full"
+          viewBox="0 0 400 300"
+          preserveAspectRatio="xMidYMid meet"
         >
-          {/* Patient body (horizontal) */}
-          <ellipse cx="140" cy="45" rx="100" ry="12" fill="#8B7355" opacity="0.8" />
+          <rect x="0" y="260" width="400" height="40" fill="#d1d5db" />
           
-          {/* Patient head */}
-          <circle cx="250" cy="40" r="18" fill="#DEB887" />
-          
-          {/* Patient face details */}
-          <ellipse cx="258" cy="38" rx="2" ry="1" fill="#333" /> {/* Eye closed */}
-          
-          {/* Patient arms */}
-          <line x1="180" y1="45" x2="200" y2="55" stroke="#DEB887" strokeWidth="8" strokeLinecap="round" />
-          <line x1="100" y1="45" x2="80" y2="55" stroke="#DEB887" strokeWidth="8" strokeLinecap="round" />
-          
-          {/* Patient legs */}
-          <line x1="60" y1="45" x2="30" y2="50" stroke="#4A5568" strokeWidth="12" strokeLinecap="round" />
-          <line x1="50" y1="50" x2="20" y2="55" stroke="#2D3748" strokeWidth="10" strokeLinecap="round" />
-          
-          {/* Chest area marker */}
-          <ellipse 
-            cx="160" 
-            cy="40" 
-            rx="20" 
-            ry="8" 
-            fill="none" 
-            stroke="#DC2626" 
-            strokeWidth="2" 
-            strokeDasharray="4 2"
-            className={isCompressing ? "opacity-100" : "opacity-50"}
-          />
-        </svg>
-        
-        {/* Rescuer (performing CPR) */}
-        <svg 
-          className="absolute bottom-8 left-1/2 transition-transform duration-75"
-          style={{ 
-            transform: `translateX(-50%) translateY(${isCompressing ? '8px' : '0px'})`,
-          }}
-          width="120"
-          height="140"
-          viewBox="0 0 120 140"
-        >
-          {/* Rescuer body (kneeling) */}
-          {/* Head */}
-          <circle cx="60" cy="25" r="20" fill="#DEB887" />
-          
-          {/* Face features */}
-          <circle cx="52" cy="22" r="2" fill="#333" />
-          <circle cx="68" cy="22" r="2" fill="#333" />
-          <path d="M 55 30 Q 60 34 65 30" stroke="#333" strokeWidth="2" fill="none" />
-          
-          {/* Hair */}
-          <ellipse cx="60" cy="12" rx="18" ry="8" fill="#4A3728" />
-          
-          {/* Torso */}
-          <path 
-            d="M 40 45 L 35 90 L 85 90 L 80 45 Z" 
-            fill="#3B82F6"
-            className={isCompressing ? "opacity-90" : "opacity-100"}
-          />
-          
-          {/* Arms (pressing down) */}
-          <g className={`transition-transform duration-75 ${isCompressing ? 'translate-y-1' : ''}`}>
-            {/* Left arm */}
-            <line x1="35" y1="55" x2="20" y2="100" stroke="#DEB887" strokeWidth="10" strokeLinecap="round" />
-            {/* Right arm */}
-            <line x1="85" y1="55" x2="100" y2="100" stroke="#DEB887" strokeWidth="10" strokeLinecap="round" />
+          <g>
+            <ellipse cx="200" cy="245" rx="130" ry="20" fill="#374151" />
             
-            {/* Hands (interlocked on chest) */}
-            <ellipse cx="60" cy="105" rx="25" ry="12" fill="#DEB887" />
-            <ellipse cx="60" cy="108" rx="20" ry="8" fill="#C4A574" />
+            <ellipse cx="320" cy="230" rx="28" ry="24" fill="#fcd9b6" />
+            <ellipse cx="328" cy="226" rx="3" ry="1.5" fill="#333" />
+            <path d="M 318 238 Q 322 236 326 238" stroke="#a87d5a" strokeWidth="1.5" fill="none" />
+            <ellipse cx="320" cy="212" rx="26" ry="10" fill="#5c4033" />
+            
+            <ellipse cx="200" cy="235" rx="50" ry="22" fill="#e5e7eb" />
+            <ellipse cx="200" cy="230" rx="45" ry="18" fill="#f3f4f6" />
+            
+            <ellipse cx="80" cy="245" rx="45" ry="12" fill="#1e3a5f" />
+            <ellipse cx="40" cy="250" rx="20" ry="10" fill="#0f172a" />
           </g>
-          
-          {/* Legs (kneeling position) */}
-          <ellipse cx="45" cy="100" rx="12" ry="20" fill="#2D3748" />
-          <ellipse cx="75" cy="100" rx="12" ry="20" fill="#2D3748" />
-          
-          {/* Knees */}
-          <ellipse cx="35" cy="115" rx="8" ry="6" fill="#1A202C" />
-          <ellipse cx="85" cy="115" rx="8" ry="6" fill="#1A202C" />
+
+          <g 
+            className="transition-transform duration-75"
+            style={{ 
+              transform: isCompressing ? 'translateY(8px)' : 'translateY(0px)',
+              transformOrigin: 'center bottom'
+            }}
+          >
+            <ellipse cx="200" cy="80" rx="22" ry="24" fill="#fcd9b6" />
+            
+            <circle cx="192" cy="76" r="3" fill="#333" />
+            <circle cx="208" cy="76" r="3" fill="#333" />
+            <path d="M 195 88 Q 200 92 205 88" stroke="#333" strokeWidth="2" fill="none" />
+            
+            <ellipse cx="200" cy="60" rx="20" ry="12" fill="#10b981" />
+            <path d="M 180 58 Q 200 48 220 58" fill="#10b981" />
+            
+            <path 
+              d="M 175 105 Q 160 150 170 180 L 230 180 Q 240 150 225 105 Z" 
+              fill="#10b981"
+            />
+            
+            <path 
+              d="M 175 115 Q 140 140 150 180 L 155 210 L 170 210 L 175 180 Q 175 160 185 140"
+              fill="#10b981"
+            />
+            <path 
+              d="M 225 115 Q 260 140 250 180 L 245 210 L 230 210 L 225 180 Q 225 160 215 140"
+              fill="#10b981"
+            />
+          </g>
+
+          <g
+            className="transition-transform duration-75"
+            style={{ 
+              transform: isCompressing ? 'translateY(12px)' : 'translateY(0px)',
+            }}
+          >
+            <path 
+              d="M 168 180 Q 175 195 185 205"
+              stroke="#fcd9b6" strokeWidth="14" strokeLinecap="round" fill="none"
+            />
+            <path 
+              d="M 232 180 Q 225 195 215 205"
+              stroke="#fcd9b6" strokeWidth="14" strokeLinecap="round" fill="none"
+            />
+            
+            <ellipse cx="200" cy="215" rx="28" ry="12" fill="#fcd9b6" />
+            <ellipse cx="200" cy="218" rx="22" ry="8" fill="#e5c9a8" />
+            
+            <line x1="185" y1="215" x2="190" y2="215" stroke="#d4a574" strokeWidth="1" />
+            <line x1="193" y1="215" x2="198" y2="215" stroke="#d4a574" strokeWidth="1" />
+            <line x1="202" y1="215" x2="207" y2="215" stroke="#d4a574" strokeWidth="1" />
+            <line x1="210" y1="215" x2="215" y2="215" stroke="#d4a574" strokeWidth="1" />
+          </g>
+
+          <g
+            className="transition-transform duration-75"
+            style={{ 
+              transform: isCompressing ? 'translateY(4px)' : 'translateY(0px)',
+            }}
+          >
+            <path 
+              d="M 170 180 Q 155 220 130 250"
+              stroke="#1e3a5f" strokeWidth="24" strokeLinecap="round" fill="none"
+            />
+            <ellipse cx="125" cy="255" rx="12" ry="8" fill="#0f172a" />
+            
+            <path 
+              d="M 230 180 Q 245 220 270 250"
+              stroke="#1e3a5f" strokeWidth="24" strokeLinecap="round" fill="none"
+            />
+            <ellipse cx="275" cy="255" rx="12" ry="8" fill="#0f172a" />
+          </g>
+
+          {isCompressing && (
+            <>
+              <circle cx="200" cy="230" r="35" fill="none" stroke="#dc2626" strokeWidth="3" opacity="0.6">
+                <animate attributeName="r" values="25;40;25" dur="0.3s" repeatCount="1" />
+                <animate attributeName="opacity" values="0.8;0.2;0.8" dur="0.3s" repeatCount="1" />
+              </circle>
+              
+              <g transform="translate(200, 180)">
+                <path d="M 0 0 L 0 20" stroke="#dc2626" strokeWidth="3" strokeLinecap="round">
+                  <animate attributeName="d" values="M 0 -5 L 0 15;M 0 5 L 0 25;M 0 -5 L 0 15" dur="0.3s" repeatCount="1" />
+                </path>
+                <path d="M -6 14 L 0 20 L 6 14" stroke="#dc2626" strokeWidth="3" strokeLinecap="round" fill="none" />
+              </g>
+            </>
+          )}
+
+          <text x="200" y="30" textAnchor="middle" className="text-sm font-bold" fill="#dc2626" opacity={isCompressing ? 1 : 0.3}>
+            PUSH HARD - 2 INCHES DEEP
+          </text>
         </svg>
 
-        {/* Compression Indicator */}
-        <div 
-          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full transition-all duration-75 ${
-            isCompressing 
-              ? 'bg-red-500/30 scale-110' 
-              : 'bg-red-500/10 scale-100'
-          }`}
-        />
-
-        {/* Push indicator arrows */}
-        {isCompressing && (
-          <div className="absolute top-12 left-1/2 -translate-x-1/2 flex flex-col items-center">
-            <div className="text-red-500 font-bold text-sm animate-bounce">PUSH</div>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-red-500">
-              <path d="M12 4L12 20M12 20L6 14M12 20L18 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-        )}
+        <div className={`absolute bottom-4 left-4 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+          isCompressing ? 'bg-red-500 text-white' : 'bg-muted text-muted-foreground'
+        }`}>
+          {isCompressing ? 'COMPRESS' : 'RELEASE'}
+        </div>
       </div>
 
-      {/* Count Display */}
       <div className="flex items-center justify-center gap-8 mb-4">
         <div className="text-center">
           <div 
-            className={`text-8xl font-bold transition-all duration-100 ${
+            className={`text-7xl font-bold transition-all duration-100 ${
               isCompressing 
                 ? 'text-red-500 scale-110' 
                 : 'text-foreground scale-100'
@@ -188,17 +195,27 @@ export default function CPRAnimation() {
         </div>
       </div>
 
-      {/* Rhythm Guide */}
-      <div className="w-full bg-muted/50 rounded-xl p-4 text-center">
-        <p className="text-lg font-semibold mb-2">CPR Rhythm Guide</p>
-        <div className="flex items-center justify-center gap-2 text-muted-foreground">
-          <span className="text-2xl">Push hard</span>
-          <span className="text-xl">&bull;</span>
-          <span className="text-2xl">Push fast</span>
-          <span className="text-xl">&bull;</span>
-          <span className="text-2xl">100-120/min</span>
+      <div className="w-full bg-muted/50 rounded-xl p-4">
+        <p className="text-lg font-semibold mb-3 text-center">CPR Hand Position</p>
+        <div className="grid grid-cols-1 gap-2 text-sm">
+          <div className="flex items-start gap-2">
+            <span className="bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
+            <span>Place heel of one hand on center of chest</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
+            <span>Put other hand on top, interlace fingers</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold flex-shrink-0">3</span>
+            <span>Keep arms straight, push hard and fast</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold flex-shrink-0">4</span>
+            <span>Push 2 inches deep, 100-120 times per minute</span>
+          </div>
         </div>
-        <p className="text-sm text-muted-foreground mt-3">
+        <p className="text-xs text-muted-foreground mt-3 text-center">
           After 30 compressions, give 2 rescue breaths if trained. Then continue.
         </p>
       </div>
