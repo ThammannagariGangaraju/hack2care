@@ -157,30 +157,48 @@ Respond with ONLY a JSON object in this exact format (no markdown, no code block
           const hospitalsData = await hospitalsResponse.json();
           const pharmaciesData = await pharmaciesResponse.json();
           
-          const hospitals = (hospitalsData.results || []).slice(0, 5).map((place: any) => ({
-            name: place.name,
-            address: place.vicinity || place.formatted_address || "Address not available",
-            distance: calculateDistance(latitude, longitude, place.geometry.location.lat, place.geometry.location.lng),
-            latitude: place.geometry.location.lat,
-            longitude: place.geometry.location.lng,
-            type: "hospital",
-            rating: place.rating || null,
-            openNow: place.opening_hours?.open_now ?? null
-          }));
+          // Log API response status for debugging
+          console.log("Google Maps API hospitals status:", hospitalsData.status);
+          console.log("Google Maps API pharmacies status:", pharmaciesData.status);
           
-          const pharmacies = (pharmaciesData.results || []).slice(0, 5).map((place: any) => ({
-            name: place.name,
-            address: place.vicinity || place.formatted_address || "Address not available",
-            distance: calculateDistance(latitude, longitude, place.geometry.location.lat, place.geometry.location.lng),
-            latitude: place.geometry.location.lat,
-            longitude: place.geometry.location.lng,
-            type: "pharmacy",
-            rating: place.rating || null,
-            openNow: place.opening_hours?.open_now ?? null
-          }));
+          // Check for API errors
+          if (hospitalsData.status === "REQUEST_DENIED" || pharmaciesData.status === "REQUEST_DENIED") {
+            console.error("Google Maps API denied:", hospitalsData.error_message || pharmaciesData.error_message);
+            throw new Error("API request denied - check API key and enabled APIs");
+          }
           
-          res.json({ hospitals, pharmacies });
-          return;
+          if (hospitalsData.status === "OK" || pharmaciesData.status === "OK") {
+            const hospitals = (hospitalsData.results || []).slice(0, 5).map((place: any) => ({
+              name: place.name,
+              address: place.vicinity || place.formatted_address || "Address not available",
+              distance: calculateDistance(latitude, longitude, place.geometry.location.lat, place.geometry.location.lng),
+              latitude: place.geometry.location.lat,
+              longitude: place.geometry.location.lng,
+              type: "hospital",
+              rating: place.rating || null,
+              openNow: place.opening_hours?.open_now ?? null
+            }));
+            
+            const pharmacies = (pharmaciesData.results || []).slice(0, 5).map((place: any) => ({
+              name: place.name,
+              address: place.vicinity || place.formatted_address || "Address not available",
+              distance: calculateDistance(latitude, longitude, place.geometry.location.lat, place.geometry.location.lng),
+              latitude: place.geometry.location.lat,
+              longitude: place.geometry.location.lng,
+              type: "pharmacy",
+              rating: place.rating || null,
+              openNow: place.opening_hours?.open_now ?? null
+            }));
+            
+            // Only return if we got results, otherwise fall through to sample data
+            if (hospitals.length > 0 || pharmacies.length > 0) {
+              res.json({ hospitals, pharmacies });
+              return;
+            }
+          }
+          
+          // Fall through to sample data if no results
+          console.log("No results from Google Maps API, using sample data");
         } catch (apiError) {
           console.error("Google Maps API error:", apiError);
           // Fall through to sample data
