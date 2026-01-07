@@ -45,44 +45,74 @@ export default function CPRAnimation() {
 
   return (
     <div className="flex flex-col items-center">
+      <style>{`
+        @keyframes pushDown {
+          0%, 100% { 
+            transform: translateY(0) scaleY(1); 
+          }
+          50% { 
+            transform: translateY(6px) scaleY(0.97); 
+          }
+        }
+        @keyframes pushHands {
+          0%, 100% { 
+            clip-path: inset(0 0 0 0);
+            transform: translateY(0);
+          }
+          50% { 
+            clip-path: inset(0 0 0 0);
+            transform: translateY(8px);
+          }
+        }
+        .cpr-animate {
+          animation: pushDown 0.55s ease-in-out infinite;
+        }
+        .pulse-ring {
+          animation: pulse-ring 0.55s ease-out infinite;
+        }
+        @keyframes pulse-ring {
+          0% {
+            transform: scale(0.8);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(1.4);
+            opacity: 0;
+          }
+        }
+      `}</style>
+      
       <div className="relative w-full max-w-md bg-white dark:bg-gray-100 rounded-2xl overflow-hidden mb-4 p-4">
-        <div 
-          className="relative transition-transform duration-100 ease-out"
-          style={{
-            transform: isCompressing ? 'scale(1.02) translateY(2px)' : 'scale(1) translateY(0px)'
-          }}
-        >
+        <div className="relative cpr-animate">
           <img 
             src={cprImage} 
             alt="CPR chest compressions demonstration showing proper hand position"
             className="w-full h-auto object-contain"
           />
           
-          <div 
-            className={`absolute top-[45%] left-[35%] w-12 h-12 transition-all duration-100 ${
-              isCompressing ? 'opacity-100 scale-110' : 'opacity-0 scale-100'
-            }`}
-          >
-            <div className="w-full h-full rounded-full bg-red-500/40 animate-ping" />
+          <div className="absolute top-[42%] left-[32%] w-16 h-16 pointer-events-none">
+            <div className="absolute inset-0 rounded-full border-4 border-red-500 pulse-ring" />
+            <div className="absolute inset-2 rounded-full bg-red-500/30" />
           </div>
           
-          {isCompressing && (
-            <div className="absolute top-[30%] left-[35%] flex flex-col items-center">
-              <svg 
-                className="w-8 h-8 text-red-500 animate-bounce"
-                viewBox="0 0 24 24" 
-                fill="none"
-              >
-                <path 
-                  d="M12 4L12 20M12 20L6 14M12 20L18 14" 
-                  stroke="currentColor" 
-                  strokeWidth="3" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-          )}
+          <div className="absolute top-[28%] left-[36%] flex flex-col items-center pointer-events-none">
+            <svg 
+              className="w-8 h-8 text-red-600"
+              viewBox="0 0 24 24" 
+              fill="none"
+              style={{
+                animation: 'pushHands 0.55s ease-in-out infinite'
+              }}
+            >
+              <path 
+                d="M12 4L12 20M12 20L6 14M12 20L18 14" 
+                stroke="currentColor" 
+                strokeWidth="3" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
         </div>
 
         <div className={`absolute bottom-2 left-2 px-3 py-1.5 rounded-full text-sm font-bold transition-all duration-100 ${
