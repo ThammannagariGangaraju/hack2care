@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import HomePage from "@/pages/home";
 import DecisionTree from "@/pages/decision-tree";
 import FirstAidResults from "@/pages/first-aid-results";
-import type { DecisionAnswers, FirstAidResponse, LocationData, NearbyPlace } from "@shared/schema";
+import type { DecisionAnswers, FirstAidResponse, LocationData } from "@shared/schema";
 import { apiRequest } from "./lib/queryClient";
 
 type AppState = "home" | "questions" | "results";
@@ -24,53 +24,6 @@ const OFFLINE_FIRST_AID: FirstAidResponse = {
   showCPR: false,
   priority: 'urgent'
 };
-
-// Sample nearby places (these would come from real Google Maps API)
-const SAMPLE_HOSPITALS: NearbyPlace[] = [
-  {
-    name: "City General Hospital",
-    address: "123 Main Street, City Center",
-    distance: "1.2 km",
-    latitude: 0,
-    longitude: 0,
-    type: "hospital"
-  },
-  {
-    name: "Apollo Emergency Care",
-    address: "456 Health Avenue, Medical District",
-    distance: "2.5 km",
-    latitude: 0,
-    longitude: 0,
-    type: "hospital"
-  },
-  {
-    name: "Government Medical Center",
-    address: "789 Hospital Road",
-    distance: "3.1 km",
-    latitude: 0,
-    longitude: 0,
-    type: "hospital"
-  }
-];
-
-const SAMPLE_PHARMACIES: NearbyPlace[] = [
-  {
-    name: "24/7 MedPlus Pharmacy",
-    address: "Near City Hospital",
-    distance: "0.8 km",
-    latitude: 0,
-    longitude: 0,
-    type: "pharmacy"
-  },
-  {
-    name: "Apollo Pharmacy",
-    address: "Medical District",
-    distance: "1.5 km",
-    latitude: 0,
-    longitude: 0,
-    type: "pharmacy"
-  }
-];
 
 // Generate basic first aid guide based on answers - INSTANT, no API needed
 function getBasicFirstAidGuide(answers: DecisionAnswers): FirstAidResponse {
@@ -139,15 +92,9 @@ function App() {
   const [firstAidData, setFirstAidData] = useState<FirstAidResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  const [nearbyHospitals, setNearbyHospitals] = useState<NearbyPlace[]>([]);
-  const [nearbyPharmacies, setNearbyPharmacies] = useState<NearbyPlace[]>([]);
 
-  // Immediately load places on mount, then update with real location if available
+  // Get user location on mount
   useEffect(() => {
-    // Immediately load places with default coordinates - don't wait for geolocation
-    fetchNearbyPlacesDefault();
-    
-    // Then try to get real location and update places
     if ('geolocation' in navigator) {
       const timeoutId = setTimeout(() => {
         // Fallback if geolocation takes too long
@@ -164,9 +111,6 @@ function App() {
           };
           setLocation(locationData);
           setLocationError(null);
-          
-          // Update nearby places with real coordinates
-          fetchNearbyPlaces(locationData);
         },
         (error) => {
           clearTimeout(timeoutId);
@@ -179,23 +123,6 @@ function App() {
       setLocationError('Geolocation not supported');
     }
   }, []);
-
-  // Fetch places with default coordinates (Delhi)
-  const fetchNearbyPlacesDefault = async () => {
-    try {
-      const response = await fetch(`/api/nearby-places?lat=28.6139&lng=77.2090`);
-      if (response.ok) {
-        const data = await response.json();
-        setNearbyHospitals(data.hospitals || []);
-        setNearbyPharmacies(data.pharmacies || []);
-      } else {
-        loadSamplePlaces(null);
-      }
-    } catch (error) {
-      console.error('Error fetching nearby places:', error);
-      loadSamplePlaces(null);
-    }
-  };
 
   // Monitor online/offline status
   useEffect(() => {
@@ -210,38 +137,6 @@ function App() {
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
-
-  const fetchNearbyPlaces = async (loc: LocationData) => {
-    try {
-      const response = await fetch(`/api/nearby-places?lat=${loc.latitude}&lng=${loc.longitude}`);
-      if (response.ok) {
-        const data = await response.json();
-        setNearbyHospitals(data.hospitals || []);
-        setNearbyPharmacies(data.pharmacies || []);
-      } else {
-        loadSamplePlaces(loc);
-      }
-    } catch (error) {
-      console.error('Error fetching nearby places:', error);
-      loadSamplePlaces(loc);
-    }
-  };
-
-  const loadSamplePlaces = (loc: LocationData | null) => {
-    // Update sample places with real coordinates if available
-    const hospitals = SAMPLE_HOSPITALS.map((h, i) => ({
-      ...h,
-      latitude: loc ? loc.latitude + (i * 0.01) : 28.6139 + (i * 0.01),
-      longitude: loc ? loc.longitude + (i * 0.01) : 77.2090 + (i * 0.01)
-    }));
-    const pharmacies = SAMPLE_PHARMACIES.map((p, i) => ({
-      ...p,
-      latitude: loc ? loc.latitude + (i * 0.008) : 28.6139 + (i * 0.008),
-      longitude: loc ? loc.longitude + (i * 0.008) : 77.2090 + (i * 0.008)
-    }));
-    setNearbyHospitals(hospitals);
-    setNearbyPharmacies(pharmacies);
-  };
 
   const handleStartEmergency = () => {
     setAppState("questions");
@@ -341,8 +236,6 @@ function App() {
               firstAidData={firstAidData}
               isLoading={isLoading}
               isOffline={isOffline}
-              nearbyHospitals={nearbyHospitals}
-              nearbyPharmacies={nearbyPharmacies}
               onBack={handleBack}
               onRestart={handleRestart}
             />

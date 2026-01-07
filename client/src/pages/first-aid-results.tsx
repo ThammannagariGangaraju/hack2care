@@ -15,12 +15,10 @@ import {
   AlertTriangle,
   ArrowLeft,
   RefreshCw,
-  ExternalLink,
   WifiOff,
-  Info,
-  Loader2
+  Info
 } from "lucide-react";
-import type { DecisionAnswers, FirstAidResponse, LocationData, NearbyPlace } from "@shared/schema";
+import type { DecisionAnswers, FirstAidResponse, LocationData } from "@shared/schema";
 import CPRAnimation from "@/components/cpr-animation";
 
 interface FirstAidResultsProps {
@@ -29,8 +27,6 @@ interface FirstAidResultsProps {
   firstAidData: FirstAidResponse | null;
   isLoading: boolean;
   isOffline: boolean;
-  nearbyHospitals: NearbyPlace[];
-  nearbyPharmacies: NearbyPlace[];
   onBack: () => void;
   onRestart: () => void;
 }
@@ -41,8 +37,6 @@ export default function FirstAidResults({
   firstAidData,
   isLoading,
   isOffline,
-  nearbyHospitals,
-  nearbyPharmacies,
   onBack,
   onRestart,
 }: FirstAidResultsProps) {
@@ -125,18 +119,6 @@ export default function FirstAidResults({
       `EMERGENCY! Accident site. Location: ${locationLink}. Need help!`
     );
     return `sms:?body=${message}`;
-  };
-
-  // Open Google Maps with current location and nearby places
-  const openInMaps = (place: NearbyPlace) => {
-    const origin = location 
-      ? `${location.latitude},${location.longitude}`
-      : '';
-    const destination = `${place.latitude},${place.longitude}`;
-    const url = origin 
-      ? `https://www.google.com/maps/dir/${origin}/${destination}`
-      : `https://www.google.com/maps/search/?api=1&query=${destination}`;
-    window.open(url, '_blank');
   };
 
   // Open Maps showing current location
@@ -319,92 +301,45 @@ export default function FirstAidResults({
           </CardContent>
         </Card>
 
-        {/* Nearby Hospitals */}
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold flex items-center gap-3">
-            <Hospital className="w-8 h-8 text-primary" />
-            Nearby Hospitals
-          </h2>
-          
-          {nearbyHospitals.length === 0 ? (
-            <Card>
-              <CardContent className="p-6 text-center text-muted-foreground">
-                <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-                Searching for nearby hospitals...
-              </CardContent>
-            </Card>
-          ) : (
+        {/* Find Nearby Help */}
+        <Card className="shadow-lg">
+          <CardContent className="p-6">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <MapPin className="w-6 h-6 text-primary" />
+              Find Nearby Help
+            </h2>
+            
             <div className="space-y-3">
-              {nearbyHospitals.map((hospital, index) => (
-                <Card key={index} className="shadow-md">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-lg truncate" data-testid={`text-hospital-name-${index}`}>
-                          {hospital.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground truncate">{hospital.address}</p>
-                        <p className="text-sm font-medium text-primary mt-1">{hospital.distance}</p>
-                      </div>
-                      <Button
-                        onClick={() => openInMaps(hospital)}
-                        className="h-16 px-6 text-base font-bold flex-shrink-0"
-                        data-testid={`button-open-hospital-map-${index}`}
-                      >
-                        <ExternalLink className="w-5 h-5 mr-2" />
-                        Open in Maps
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              <a 
+                href={location 
+                  ? `https://www.google.com/maps/search/hospital+emergency/@${location.latitude},${location.longitude},14z`
+                  : "https://www.google.com/maps/search/hospital+emergency+near+me"
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid="button-find-hospitals"
+                className="flex items-center justify-center gap-3 w-full h-16 rounded-xl bg-primary text-primary-foreground font-bold text-lg"
+              >
+                <Hospital className="w-6 h-6" />
+                Find Hospitals
+              </a>
+              
+              <a 
+                href={location 
+                  ? `https://www.google.com/maps/search/pharmacy+medical+shop/@${location.latitude},${location.longitude},14z`
+                  : "https://www.google.com/maps/search/pharmacy+medical+shop+near+me"
+                }
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid="button-find-pharmacies"
+                className="flex items-center justify-center gap-3 w-full h-16 rounded-xl bg-secondary text-secondary-foreground font-bold text-lg"
+              >
+                <Pill className="w-6 h-6" />
+                Find Pharmacies
+              </a>
             </div>
-          )}
-        </div>
-
-        {/* Nearby Medical Shops */}
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold flex items-center gap-3">
-            <Pill className="w-8 h-8 text-accent-foreground" />
-            Nearby Medical Shops
-          </h2>
-          
-          {nearbyPharmacies.length === 0 ? (
-            <Card>
-              <CardContent className="p-6 text-center text-muted-foreground">
-                <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
-                Searching for nearby pharmacies...
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-3">
-              {nearbyPharmacies.map((pharmacy, index) => (
-                <Card key={index} className="shadow-md">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-lg truncate" data-testid={`text-pharmacy-name-${index}`}>
-                          {pharmacy.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground truncate">{pharmacy.address}</p>
-                        <p className="text-sm font-medium text-accent-foreground mt-1">{pharmacy.distance}</p>
-                      </div>
-                      <Button
-                        onClick={() => openInMaps(pharmacy)}
-                        variant="secondary"
-                        className="h-16 px-6 text-base font-bold flex-shrink-0"
-                        data-testid={`button-open-pharmacy-map-${index}`}
-                      >
-                        <ExternalLink className="w-5 h-5 mr-2" />
-                        Open in Maps
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Disclaimer */}
         <div className="text-center text-xs text-muted-foreground p-4 bg-muted/30 rounded-xl">
