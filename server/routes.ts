@@ -4,17 +4,22 @@ import { storage } from "./storage";
 import { GoogleGenAI } from "@google/genai";
 import { insertEmergencySchema } from "@shared/schema";
 
-// Helper function to calculate distance between two points
-function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): string {
-  const R = 6371; // Earth's radius in km
+// Helper function to calculate distance between two points in meters
+function calculateDistanceMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371000; // Earth's radius in meters
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
   const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
             Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
             Math.sin(dLon/2) * Math.sin(dLon/2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  const distance = R * c;
-  return distance < 1 ? `${Math.round(distance * 1000)} m` : `${distance.toFixed(1)} km`;
+  return R * c;
+}
+
+// Helper function to format distance as string
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): string {
+  const meters = calculateDistanceMeters(lat1, lon1, lat2, lon2);
+  return meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`;
 }
 
 // Initialize Gemini AI client using Replit AI Integrations
@@ -137,137 +142,126 @@ Respond with ONLY a JSON object in this exact format (no markdown, no code block
     }
   });
 
-  // Get nearby places (hospitals and pharmacies) using Google Maps Places API
+  // Get nearby places (hospitals and pharmacies) using OpenStreetMap Overpass API (FREE, no API key)
   app.get("/api/nearby-places", async (req, res) => {
     try {
       const { lat, lng } = req.query;
-      const latitude = parseFloat(lat as string) || 28.6139;
-      const longitude = parseFloat(lng as string) || 77.2090;
       
-      const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
+      if (!lat || !lng) {
+        res.status(400).json({ error: "Location required", message: "Please provide latitude and longitude" });
+        return;
+      }
       
-      // If Google Maps API key is available, use real Places API (New)
-      if (GOOGLE_MAPS_API_KEY) {
-        try {
-          // Use Places API (New) - Text Search endpoint
-          const searchPlaces = async (query: string): Promise<any[]> => {
-            const response = await fetch('https://places.googleapis.com/v1/places:searchText', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-Goog-Api-Key': GOOGLE_MAPS_API_KEY,
-                'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.location,places.rating,places.currentOpeningHours'
-              },
-              body: JSON.stringify({
-                textQuery: query,
-                locationBias: {
-                  circle: {
-                    center: { latitude, longitude },
-                    radius: 5000.0
-                  }
-                },
-                maxResultCount: 5
-              })
-            });
-            const data = await response.json();
-            if (data.error) {
-              console.error("Places API error:", data.error.message);
-              throw new Error(data.error.message);
-            }
-            return data.places || [];
-          };
-
-          const [hospitalPlaces, pharmacyPlaces] = await Promise.all([
-            searchPlaces("hospital emergency near me"),
-            searchPlaces("pharmacy medical shop near me")
-          ]);
-
-          const hospitals = hospitalPlaces.map((place: any) => ({
-            name: place.displayName?.text || "Hospital",
-            address: place.formattedAddress || "Address not available",
-            distance: calculateDistance(latitude, longitude, place.location?.latitude || latitude, place.location?.longitude || longitude),
-            latitude: place.location?.latitude || latitude,
-            longitude: place.location?.longitude || longitude,
-            type: "hospital",
-            rating: place.rating || null,
-            openNow: place.currentOpeningHours?.openNow ?? null
-          }));
-
-          const pharmacies = pharmacyPlaces.map((place: any) => ({
-            name: place.displayName?.text || "Pharmacy",
-            address: place.formattedAddress || "Address not available",
-            distance: calculateDistance(latitude, longitude, place.location?.latitude || latitude, place.location?.longitude || longitude),
-            latitude: place.location?.latitude || latitude,
-            longitude: place.location?.longitude || longitude,
-            type: "pharmacy",
-            rating: place.rating || null,
-            openNow: place.currentOpeningHours?.openNow ?? null
-          }));
-
-          if (hospitals.length > 0 || pharmacies.length > 0) {
-            console.log(`Found ${hospitals.length} hospitals and ${pharmacies.length} pharmacies`);
-            res.json({ hospitals, pharmacies });
-            return;
-          }
-
-          console.log("No results from Google Maps API, using sample data");
-        } catch (apiError) {
-          console.error("Google Maps API error:", apiError);
-          // Fall through to sample data
+      const latitude = parseFloat(lat as string);
+      const longitude = parseFloat(lng as string);
+      
+      if (isNaN(latitude) || isNaN(longitude)) {
+        res.status(400).json({ error: "Invalid coordinates", message: "Latitude and longitude must be valid numbers" });
+        return;
+      }
+      
+      const radiusMeters = 5000; // 5km search radius
+      
+      // Overpass API query for hospitals and pharmacies
+      const overpassQuery = `
+        [out:json][timeout:25];
+        (
+          node["amenity"="hospital"](around:${radiusMeters},${latitude},${longitude});
+          way["amenity"="hospital"](around:${radiusMeters},${latitude},${longitude});
+          node["amenity"="pharmacy"](around:${radiusMeters},${latitude},${longitude});
+          way["amenity"="pharmacy"](around:${radiusMeters},${latitude},${longitude});
+          node["amenity"="clinic"](around:${radiusMeters},${latitude},${longitude});
+          way["amenity"="clinic"](around:${radiusMeters},${latitude},${longitude});
+        );
+        out center;
+      `;
+      
+      console.log("Fetching places from Overpass API...");
+      
+      const overpassUrl = "https://overpass-api.de/api/interpreter";
+      const response = await fetch(overpassUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `data=${encodeURIComponent(overpassQuery)}`
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Overpass API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const elements = data.elements || [];
+      
+      console.log(`Overpass API returned ${elements.length} elements`);
+      
+      const hospitals: any[] = [];
+      const pharmacies: any[] = [];
+      
+      for (const element of elements) {
+        // Get coordinates (for ways, use center; for nodes, use lat/lon)
+        const placeLat = element.center?.lat || element.lat;
+        const placeLon = element.center?.lon || element.lon;
+        
+        if (!placeLat || !placeLon) continue;
+        
+        const tags = element.tags || {};
+        const amenity = tags.amenity;
+        
+        // Build address from available tags
+        const addressParts = [];
+        if (tags["addr:street"]) addressParts.push(tags["addr:street"]);
+        if (tags["addr:housenumber"]) addressParts.unshift(tags["addr:housenumber"]);
+        if (tags["addr:city"]) addressParts.push(tags["addr:city"]);
+        if (tags["addr:postcode"]) addressParts.push(tags["addr:postcode"]);
+        
+        const address = addressParts.length > 0 
+          ? addressParts.join(", ")
+          : tags.address || "Address not available";
+        
+        const place = {
+          name: tags.name || (amenity === "pharmacy" ? "Pharmacy" : amenity === "clinic" ? "Clinic" : "Hospital"),
+          address,
+          distance: calculateDistance(latitude, longitude, placeLat, placeLon),
+          distanceMeters: calculateDistanceMeters(latitude, longitude, placeLat, placeLon),
+          latitude: placeLat,
+          longitude: placeLon,
+          type: amenity === "pharmacy" ? "pharmacy" : "hospital",
+          phone: tags.phone || tags["contact:phone"] || null,
+          website: tags.website || tags["contact:website"] || null,
+          openingHours: tags.opening_hours || null
+        };
+        
+        if (amenity === "pharmacy") {
+          pharmacies.push(place);
+        } else {
+          hospitals.push(place);
         }
       }
-
-      // Fallback to sample data if no API key or API fails
-      const hospitals = [
-        {
-          name: "City General Hospital",
-          address: "Main Road, Near Central Station",
-          distance: "1.2 km",
-          latitude: latitude + 0.008,
-          longitude: longitude + 0.006,
-          type: "hospital"
-        },
-        {
-          name: "Apollo Emergency Care",
-          address: "Medical District, Highway Junction",
-          distance: "2.5 km",
-          latitude: latitude + 0.015,
-          longitude: longitude + 0.012,
-          type: "hospital"
-        },
-        {
-          name: "Government Medical Center",
-          address: "Hospital Road, Sector 5",
-          distance: "3.1 km",
-          latitude: latitude + 0.022,
-          longitude: longitude + 0.018,
-          type: "hospital"
-        }
-      ];
-
-      const pharmacies = [
-        {
-          name: "24/7 MedPlus Pharmacy",
-          address: "Near City Hospital, Main Street",
-          distance: "0.8 km",
-          latitude: latitude + 0.005,
-          longitude: longitude + 0.004,
-          type: "pharmacy"
-        },
-        {
-          name: "Apollo Pharmacy",
-          address: "Medical District Plaza",
-          distance: "1.5 km",
-          latitude: latitude + 0.010,
-          longitude: longitude + 0.008,
-          type: "pharmacy"
-        }
-      ];
-
-      res.json({ hospitals, pharmacies });
+      
+      // Sort by distance
+      hospitals.sort((a, b) => a.distanceMeters - b.distanceMeters);
+      pharmacies.sort((a, b) => a.distanceMeters - b.distanceMeters);
+      
+      // Limit to 10 each
+      const limitedHospitals = hospitals.slice(0, 10);
+      const limitedPharmacies = pharmacies.slice(0, 10);
+      
+      console.log(`Found ${limitedHospitals.length} hospitals and ${limitedPharmacies.length} pharmacies`);
+      
+      res.json({ 
+        hospitals: limitedHospitals, 
+        pharmacies: limitedPharmacies,
+        source: "openstreetmap"
+      });
+      
     } catch (error) {
       console.error("Error fetching nearby places:", error);
-      res.status(500).json({ error: "Failed to fetch nearby places" });
+      res.status(500).json({ 
+        error: "Failed to fetch nearby places", 
+        message: error instanceof Error ? error.message : "Network error",
+        hospitals: [],
+        pharmacies: []
+      });
     }
   });
 
