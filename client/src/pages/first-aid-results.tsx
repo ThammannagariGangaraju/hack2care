@@ -176,13 +176,6 @@ export default function FirstAidResults({
       iconAnchor: [6, 6]
     });
 
-    const pharmacyIcon = L.divIcon({
-      html: '<div style="background: #16a34a; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>',
-      className: "pharmacy-marker",
-      iconSize: [12, 12],
-      iconAnchor: [6, 6]
-    });
-
     const medicalStoreIcon = L.divIcon({
       html: '<div style="background: #2563eb; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>',
       className: "medical-store-marker",
@@ -194,12 +187,6 @@ export default function FirstAidResults({
       const ownershipLabel = (hospital as any).ownership ? ` (${(hospital as any).ownership})` : "";
       const marker = L.marker([hospital.latitude, hospital.longitude], { icon: hospitalIcon })
         .bindPopup(`<b>${hospital.name}</b>${ownershipLabel}<br>${hospital.address}<br>${hospital.distance}`);
-      markersLayerRef.current?.addLayer(marker);
-    });
-
-    nearbyPlaces.pharmacies.forEach((pharmacy) => {
-      const marker = L.marker([pharmacy.latitude, pharmacy.longitude], { icon: pharmacyIcon })
-        .bindPopup(`<b>${pharmacy.name}</b><br>${pharmacy.address}<br>${pharmacy.distance}`);
       markersLayerRef.current?.addLayer(marker);
     });
 
@@ -486,7 +473,7 @@ export default function FirstAidResults({
           <CardContent className="p-4">
             <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
               <Hospital className="w-5 h-5 text-primary" />
-              Nearby Hospitals
+              Nearby Hospitals (Govt & Private)
             </h2>
 
             {nearbyPlaces.isLoading ? (
@@ -556,60 +543,8 @@ export default function FirstAidResults({
         <Card className="shadow-lg">
           <CardContent className="p-4">
             <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-              <Pill className="w-5 h-5 text-green-600" />
-              Nearby Pharmacies
-            </h2>
-
-            {nearbyPlaces.isLoading ? (
-              <div className="flex items-center justify-center py-8 text-muted-foreground">
-                <Loader2 className="w-6 h-6 animate-spin mr-2" />
-                <span>Searching for pharmacies...</span>
-              </div>
-            ) : nearbyPlaces.error ? (
-              <div className="flex items-center gap-2 p-4 bg-destructive/10 rounded-xl text-destructive">
-                <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                <span>{nearbyPlaces.error}</span>
-              </div>
-            ) : nearbyPlaces.pharmacies.length === 0 ? (
-              <p className="text-muted-foreground text-center py-4">No pharmacies found nearby</p>
-            ) : (
-              <div className="space-y-3">
-                {nearbyPlaces.pharmacies.slice(0, 5).map((pharmacy, index) => (
-                  <div 
-                    key={index}
-                    className="p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-border"
-                    data-testid={`card-pharmacy-${index}`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold truncate" data-testid={`text-pharmacy-name-${index}`}>
-                          {pharmacy.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground truncate">{pharmacy.address}</p>
-                        <p className="text-sm font-medium text-green-600 mt-1">{pharmacy.distance}</p>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => openDirections(pharmacy)}
-                        data-testid={`button-pharmacy-directions-${index}`}
-                      >
-                        <ExternalLink className="w-4 h-4 mr-1" />
-                        Open in Maps
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-lg">
-          <CardContent className="p-4">
-            <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
               <Store className="w-5 h-5 text-blue-600" />
-              Nearby Medical Stores
+              Find Medical Stores Nearby
             </h2>
 
             {nearbyPlaces.isLoading ? (
