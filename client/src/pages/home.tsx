@@ -19,51 +19,25 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
   useEffect(() => {
     if (isAutoDetected) return;
 
-    let detectionPhaseTimeout: NodeJS.Timeout | null = null;
-
     languageDetector.setOnDetected((detectedLang: string) => {
-      // Start the 5-second timer ONLY on the first speech input
-      if (!detectionPhaseTimeout && !isAutoDetected) {
-        console.log("[LanguageDetector] Speech detected. Starting 5s window.");
-        showFeedback(translate("home.detecting_language", language), 5000);
-        
-        detectionPhaseTimeout = setTimeout(() => {
-          if (!isAutoDetected) {
-            console.log("[LanguageDetector] 5s window closed. Locking current state.");
-            languageDetector.stop();
-            setIsAutoDetected(true);
-          }
-        }, 5000);
-      }
-
-      // If we already have a detection phase going, or if it's the same language, 
-      // we check if we should switch. 
       if (isAutoDetected) return;
 
       const langCode = detectedLang.split('-')[0];
-      if (langCode !== 'en') {
-        const switchStartTime = performance.now();
-        console.log(`[LanguageDetector] Detection success: "${langCode}"`);
-        
-        setLanguage(langCode);
-        setIsAutoDetected(true);
-        languageDetector.stop();
-        if (detectionPhaseTimeout) clearTimeout(detectionPhaseTimeout);
-
-        const switchTime = performance.now() - switchStartTime;
-        console.log(`[LanguageDetector] Switch completion time: ${switchTime.toFixed(2)}ms`);
-        showFeedback(`Language set to ${langCode.toUpperCase()}`);
-      }
+      console.log(`[LanguageDetector] Session adaptation triggered: "${langCode}"`);
+      
+      setLanguage(langCode);
+      setIsAutoDetected(true);
+      languageDetector.stop();
+      showFeedback(`Language set to ${langCode.toUpperCase()}`);
     });
 
     const timer = setTimeout(() => {
-      console.log("[LanguageDetector] Background listening started. Waiting for speech...");
+      console.log("[LanguageDetector] Background adaptation listening active...");
       languageDetector.start();
     }, 2000);
 
     return () => {
       clearTimeout(timer);
-      if (detectionPhaseTimeout) clearTimeout(detectionPhaseTimeout);
       languageDetector.stop();
     };
   }, [isAutoDetected, setIsAutoDetected, setLanguage, language, showFeedback]);

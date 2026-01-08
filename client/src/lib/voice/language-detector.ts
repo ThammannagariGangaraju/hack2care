@@ -21,7 +21,6 @@ export class LanguageDetector {
       this.recognition.onresult = (event: any) => {
         const last = event.results.length - 1;
         const transcript = event.results[last][0].transcript.trim();
-        const confidence = event.results[last][0].confidence;
         
         console.log(`[LanguageDetector] RAW Input: "${transcript}"`);
 
@@ -30,21 +29,18 @@ export class LanguageDetector {
 
         let detectedLang = "en"; // Default
 
-        // Detection using script-based heuristics for natural speech
-        // Telugu Unicode Range: \u0C00-\u0C7F
-        // Devanagari (Hindi) Unicode Range: \u0900-\u097F
+        // Direct script-based heuristics for immediate inference
         if (/[\u0C00-\u0C7F]/.test(transcript)) {
           detectedLang = "te";
         } else if (/[\u0900-\u097F]/.test(transcript)) {
           detectedLang = "hi";
         }
 
-        console.log(`[LanguageDetector] Natural Speech Detected: ${detectedLang}`);
+        console.log(`[LanguageDetector] Immediate Inference: ${detectedLang}`);
         
         if (this.onDetected) {
-          console.log(`[LanguageDetector] CONFIRMED: Switching to ${detectedLang}`);
           this.onDetected(detectedLang);
-          this.stop(); // Stop immediately after detection
+          this.stop(); // Lock and stop after first valid input
         }
       };
 
