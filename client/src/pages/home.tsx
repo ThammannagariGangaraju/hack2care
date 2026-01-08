@@ -4,6 +4,7 @@ import type { LocationData } from "@shared/schema";
 import logoImage from "@assets/image_1767781744439.png";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
 import { translate } from "@/lib/i18n/translations";
+import { languageDetector } from "@/lib/voice/language-detector";
 
 interface HomePageProps {
   onStartEmergency: () => void;
@@ -13,17 +14,42 @@ interface HomePageProps {
 
 export default function HomePage({ onStartEmergency, location, locationError }: HomePageProps) {
   const [pulseScale, setPulseScale] = useState(1);
-  const { language } = useLanguage();
+  const { language, setLanguage } = useLanguage();
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPulseScale(prev => prev === 1 ? 1.03 : 1);
-    }, 800);
-    return () => clearInterval(interval);
-  }, []);
+    // Initial English load first, then start detector after 2 seconds
+    const timer = setTimeout(() => {
+      console.log("[HomePage] Initializing background language detection...");
+      languageDetector.start();
+      
+      // For this demo/minimal implementation, we'll simulate a detection
+      // or set a timeout to stop. In a real scenario, the detector would
+      // call setLanguage when it's confident.
+      const detectTimer = setTimeout(() => {
+        // Fallback or auto-detected logic would go here
+        // languageDetector.stop();
+      }, 5000);
+
+      return () => clearTimeout(detectTimer);
+    }, 2000);
+
+    return () => {
+      clearTimeout(timer);
+      languageDetector.stop();
+    };
+  }, [setLanguage]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
+      {/* Detecting Overlay - subtle message */}
+      <div className="fixed top-0 left-0 w-full z-50 pointer-events-none p-2 flex justify-center">
+         <div className="bg-slate-800/80 backdrop-blur-md border border-slate-700/50 rounded-full px-4 py-1.5 shadow-lg">
+            <p className="text-slate-300 text-[10px] font-medium animate-pulse flex items-center gap-2">
+               <span className="w-1 h-1 bg-blue-500 rounded-full animate-ping" />
+               {translate("home.detecting_language", language)}
+            </p>
+         </div>
+      </div>
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3 border-b border-slate-700/50">
         <div className="flex items-center gap-3">
