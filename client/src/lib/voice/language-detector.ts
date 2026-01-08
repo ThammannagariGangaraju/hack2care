@@ -20,29 +20,31 @@ export class LanguageDetector {
       
       this.recognition.onresult = (event: any) => {
         const last = event.results.length - 1;
-        const transcript = event.results[last][0].transcript.toLowerCase().trim();
+        const transcript = event.results[last][0].transcript.trim();
         const confidence = event.results[last][0].confidence;
         
-        console.log(`[LanguageDetector] RAW Transcript: "${transcript}"`);
+        console.log(`[LanguageDetector] RAW Input: "${transcript}"`);
 
-        if (transcript === this.lastTranscript) return;
+        if (!transcript || transcript === this.lastTranscript) return;
         this.lastTranscript = transcript;
 
         let detectedLang = "en"; // Default
 
-        // Map language based on simple keywords or script detection
-        if (/[\u0C00-\u0C7F]/.test(transcript) || transcript.includes("telugu")) {
+        // Detection using script-based heuristics for natural speech
+        // Telugu Unicode Range: \u0C00-\u0C7F
+        // Devanagari (Hindi) Unicode Range: \u0900-\u097F
+        if (/[\u0C00-\u0C7F]/.test(transcript)) {
           detectedLang = "te";
-        } else if (/[\u0900-\u097F]/.test(transcript) || transcript.includes("hindi")) {
+        } else if (/[\u0900-\u097F]/.test(transcript)) {
           detectedLang = "hi";
         }
 
-        console.log(`[LanguageDetector] Selected Language: ${detectedLang}`);
+        console.log(`[LanguageDetector] Natural Speech Detected: ${detectedLang}`);
         
         if (this.onDetected) {
-          console.log(`[LanguageDetector] CONFIRMED: Triggering language switch to: ${detectedLang}`);
+          console.log(`[LanguageDetector] CONFIRMED: Switching to ${detectedLang}`);
           this.onDetected(detectedLang);
-          this.stop(); // Stop recognition right after detection
+          this.stop(); // Stop immediately after detection
         }
       };
 
