@@ -8,6 +8,7 @@ import DecisionTree from "@/pages/decision-tree";
 import FirstAidResults from "@/pages/first-aid-results";
 import type { DecisionAnswers, FirstAidResponse, LocationData } from "@shared/schema";
 import { apiRequest } from "./lib/queryClient";
+import { LanguageProvider } from "./lib/contexts/LanguageContext";
 
 type AppState = "home" | "questions" | "results";
 
@@ -210,39 +211,41 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <div className="min-h-screen bg-background text-foreground">
-          {appState === "home" && (
-            <HomePage 
-              onStartEmergency={handleStartEmergency}
-              location={location}
-              locationError={locationError}
-            />
-          )}
-          
-          {appState === "questions" && (
-            <DecisionTree
-              currentQuestion={currentQuestion}
-              answers={answers}
-              onAnswer={handleAnswer}
-              onBack={handleBack}
-            />
-          )}
-          
-          {appState === "results" && (
-            <FirstAidResults
-              answers={answers}
-              location={location}
-              firstAidData={firstAidData}
-              isLoading={isLoading}
-              isOffline={isOffline}
-              onBack={handleBack}
-              onRestart={handleRestart}
-            />
-          )}
-        </div>
-        <Toaster />
-      </TooltipProvider>
+      <LanguageProvider>
+        <TooltipProvider>
+          <div className="min-h-screen bg-background text-foreground">
+            {appState === "home" && (
+              <HomePage 
+                onStartEmergency={handleStartEmergency}
+                location={location}
+                locationError={locationError}
+              />
+            )}
+            
+            {appState === "questions" && (
+              <DecisionTree
+                currentQuestion={currentQuestion}
+                answers={answers}
+                onAnswer={handleAnswer}
+                onBack={handleBack}
+              />
+            )}
+            
+            {appState === "results" && (
+              <FirstAidResults
+                answers={answers}
+                location={location}
+                firstAidData={firstAidData}
+                isLoading={isLoading}
+                isOffline={isOffline}
+                onBack={handleBack}
+                onRestart={handleRestart}
+              />
+            )}
+          </div>
+          <Toaster />
+        </TooltipProvider>
+      </LanguageProvider>
     </QueryClientProvider>
   );
 }
