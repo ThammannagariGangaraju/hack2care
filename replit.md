@@ -40,6 +40,12 @@ Preferred communication style: Simple, everyday language.
 
 ### Key Design Patterns
 - **Offline Support**: Service worker caching with offline fallback first aid instructions
+- **Automatic Language Detection**: 
+  - **Default**: Application loads instantly in English (text and audio).
+  - **Background Detection**: System quietly initializes microphone access 2 seconds after load and detects user's native language within 5-8 seconds.
+  - **Instant Switching**: UI text and AI outputs automatically transition to the detected language.
+  - **Voice Override**: Users can change language at any time by speaking the language name (e.g., "Hindi", "Telugu", "English").
+  - **Online/Offline**: Currently uses online Web Speech API and Gemini for translations; offline fallback dictionary provided.
 - **Path Aliases**: `@/` maps to client/src, `@shared/` maps to shared directory
 - **Component Structure**: Pages in `client/src/pages/`, reusable components in `client/src/components/`
 
