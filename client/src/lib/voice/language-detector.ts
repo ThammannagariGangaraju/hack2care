@@ -6,6 +6,7 @@
 export class LanguageDetector {
   private recognition: any;
   private isListening: boolean = false;
+  private onDetected?: (lang: string) => void;
 
   constructor() {
     // Check for Web Speech API support
@@ -16,28 +17,16 @@ export class LanguageDetector {
       this.recognition.continuous = true;
       this.recognition.interimResults = false;
       
-      // Attempt to auto-detect language based on spoken content
-      // Note: Standard Web Speech API usually requires a 'lang' property,
-      // but some browsers/engines can provide results that include language metadata
-      // if not strictly pinned. 
-      
       this.recognition.onresult = (event: any) => {
         const last = event.results.length - 1;
         const transcript = event.results[last][0].transcript;
         const confidence = event.results[last][0].confidence;
+        const detectedLang = event.results[last].language || this.recognition.lang;
+
+        console.log(`[LanguageDetector] Detection result: "${transcript}" in ${detectedLang} (Confidence: ${confidence})`);
         
-        // In most browsers, the language is pre-set or defaults to the browser locale.
-        // True "language detection" from raw audio is limited in the standard Web Speech API
-        // without external services, but we can capture what the API identifies.
-        console.log(`[LanguageDetector] Detected speech: "${transcript}" (Confidence: ${confidence})`);
-        
-        // Some implementations expose the detected language if multiple were provided in a list
-        // but typically we just get the result for the current 'lang'.
-        if (event.results[last].language) {
-          console.log(`[LanguageDetector] Detected language code: ${event.results[last].language}`);
-        } else {
-          // Fallback log of browser default being used
-          console.log(`[LanguageDetector] Using recognition language: ${this.recognition.lang || 'default'}`);
+        if (this.onDetected) {
+          this.onDetected(detectedLang);
         }
       };
 
@@ -53,6 +42,10 @@ export class LanguageDetector {
     } else {
       console.warn('[LanguageDetector] Web Speech API is not supported in this browser.');
     }
+  }
+
+  public setOnDetected(cb: (lang: string) => void) {
+    this.onDetected = cb;
   }
 
   public start() {

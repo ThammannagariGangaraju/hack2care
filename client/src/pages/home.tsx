@@ -14,25 +14,37 @@ interface HomePageProps {
 
 export default function HomePage({ onStartEmergency, location, locationError }: HomePageProps) {
   const [pulseScale, setPulseScale] = useState(1);
-  const { language, setLanguage, isAutoDetected, setIsAutoDetected } = useLanguage();
+  const { language, setLanguage, isAutoDetected, setIsAutoDetected, feedbackMessage, showFeedback } = useLanguage();
 
   useEffect(() => {
     // Only run detection once on initial load
     if (isAutoDetected) return;
 
+    languageDetector.setOnDetected((detectedLang: string) => {
+      // Clean up language code (e.g., 'en-US' -> 'en')
+      const langCode = detectedLang.split('-')[0];
+      if (langCode !== language) {
+        setLanguage(langCode);
+        showFeedback(`Language set to ${langCode.toUpperCase()}`);
+        setIsAutoDetected(true);
+        languageDetector.stop();
+      }
+    });
+
     // Initial English load first, then start detector after 2 seconds
     const timer = setTimeout(() => {
       console.log("[HomePage] Starting debounced background language detection...");
       languageDetector.start();
+      showFeedback(translate("home.detecting_language", language), 5000);
       
-      // Auto-stop after 5 seconds to preserve performance
+      // Auto-stop after 8 seconds if no detection occurred
       const detectTimer = setTimeout(() => {
         if (!isAutoDetected) {
           console.log("[HomePage] Detection window closed.");
           languageDetector.stop();
           setIsAutoDetected(true);
         }
-      }, 5000);
+      }, 8000);
 
       return () => clearTimeout(detectTimer);
     }, 2000);
@@ -41,19 +53,21 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
       clearTimeout(timer);
       languageDetector.stop();
     };
-  }, [isAutoDetected, setIsAutoDetected]);
+  }, [isAutoDetected, setIsAutoDetected, setLanguage, language, showFeedback]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
-      {/* Detecting Overlay - subtle message */}
-      <div className="fixed top-0 left-0 w-full z-50 pointer-events-none p-2 flex justify-center">
-         <div className="bg-slate-800/80 backdrop-blur-md border border-slate-700/50 rounded-full px-4 py-1.5 shadow-lg">
-            <p className="text-slate-300 text-[10px] font-medium animate-pulse flex items-center gap-2">
-               <span className="w-1 h-1 bg-blue-500 rounded-full animate-ping" />
-               {translate("home.detecting_language", language)}
-            </p>
-         </div>
-      </div>
+      {/* Feedback Overlay */}
+      {feedbackMessage && (
+        <div className="fixed top-4 left-0 w-full z-50 pointer-events-none p-2 flex justify-center">
+           <div className="bg-slate-800/90 backdrop-blur-md border border-slate-700/50 rounded-full px-4 py-2 shadow-xl animate-in fade-in slide-in-from-top-4 duration-300">
+              <p className="text-slate-200 text-xs font-medium flex items-center gap-2">
+                 <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+                 {feedbackMessage}
+              </p>
+           </div>
+        </div>
+      )}
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3 border-b border-slate-700/50">
         <div className="flex items-center gap-3">

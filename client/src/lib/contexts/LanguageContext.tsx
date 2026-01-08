@@ -12,6 +12,8 @@ interface LanguageContextType {
   setLanguage: (lang: Language) => void;
   isAutoDetected: boolean;
   setIsAutoDetected: (val: boolean) => void;
+  feedbackMessage: string | null;
+  showFeedback: (msg: string, duration?: number) => void;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -19,6 +21,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>('en');
   const [isAutoDetected, setIsAutoDetected] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const lastLanguage = useRef<Language>('en');
 
   const setLanguage = (lang: Language) => {
@@ -29,8 +32,20 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setLanguageState(lang);
   };
 
+  const showFeedback = (msg: string, duration: number = 3000) => {
+    setFeedbackMessage(msg);
+    setTimeout(() => setFeedbackMessage(null), duration);
+  };
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, isAutoDetected, setIsAutoDetected }}>
+    <LanguageContext.Provider value={{ 
+      language, 
+      setLanguage, 
+      isAutoDetected, 
+      setIsAutoDetected,
+      feedbackMessage,
+      showFeedback
+    }}>
       {children}
     </LanguageContext.Provider>
   );
