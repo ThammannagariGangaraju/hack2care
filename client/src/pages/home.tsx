@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AlertTriangle, Phone, MapPin, Zap, Clock, Heart } from "lucide-react";
+import { motion } from "framer-motion";
 import type { LocationData } from "@shared/schema";
 import logoImage from "@assets/image_1767781744439.png";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
@@ -13,7 +14,6 @@ interface HomePageProps {
 }
 
 export default function HomePage({ onStartEmergency, location, locationError }: HomePageProps) {
-  const [pulseScale, setPulseScale] = useState(1);
   const { language, setLanguage, isAutoDetected, setIsAutoDetected, feedbackMessage, showFeedback } = useLanguage();
 
   useEffect(() => {
@@ -89,14 +89,35 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
         </div>
 
         {/* Main Emergency Button */}
-        <button
+        <motion.button
           onClick={onStartEmergency}
           data-testid="button-report-accident"
           className="w-full max-w-sm h-36 rounded-2xl bg-gradient-to-br from-red-500 via-red-600 to-red-700 text-white font-bold shadow-2xl shadow-red-900/50 transition-all duration-300 flex flex-col items-center justify-center gap-2 relative group"
-          style={{ transform: `scale(${pulseScale})` }}
+          animate={{
+            scale: [1, 1.05, 1, 1.05, 1],
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            repeatDelay: 0.5,
+            ease: "easeInOut",
+            times: [0, 0.2, 0.4, 0.6, 1]
+          }}
         >
           {/* Glow effect */}
-          <div className="absolute -inset-1 bg-red-500/30 rounded-2xl blur-xl opacity-70 group-hover:opacity-100 transition-opacity" />
+          <motion.div 
+            className="absolute -inset-1 bg-red-500/30 rounded-2xl blur-xl opacity-70 group-hover:opacity-100 transition-opacity"
+            animate={{
+              opacity: [0.4, 0.8, 0.4, 0.8, 0.4],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              repeatDelay: 0.5,
+              ease: "easeInOut",
+              times: [0, 0.2, 0.4, 0.6, 1]
+            }}
+          />
           
           <div className="relative z-10 flex flex-col items-center">
             <div className="bg-white/20 p-4 rounded-full mb-2 backdrop-blur-sm">
@@ -105,7 +126,7 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
             <span className="text-xl font-bold tracking-wide uppercase">{translate("home.report_accident", language)}</span>
             <span className="text-xs font-normal text-red-100 mt-1">Tap for immediate assistance</span>
           </div>
-        </button>
+        </motion.button>
 
         {/* Features Row */}
         <div className="grid grid-cols-3 gap-3 w-full max-w-sm mt-2">
