@@ -1,0 +1,30 @@
+You are upgrading the Care-Assistant-AI web application with a robust, production-quality automatic multilingual adaptation system that must work effectively in BOTH online and offline modes.
+
+Core behavior:
+When any user opens the app on mobile or desktop, the HOME PAGE must load instantly in English text and English audio by default. The app must NOT request the user to speak or display a voice prompt. After the UI is fully rendered, the system should quietly initialize microphone access in the background and detect the user’s spoken/native language within 5 seconds.
+
+Instant language switching:
+Once a language is detected, the app must react immediately — within 1 second — by translating and converting ALL visible UI text and ALL AI audio outputs into the detected language. The entire process must be automatic and inbuilt, with NO manual dropdowns or buttons. Ignore background audio like music or songs and process only clear human speech from the microphone.
+
+Voice override support:
+Continuously listen for simple spoken language commands. At any time, the user can override the detected language by saying the language they want to read (for example “English”, “Hindi”, “Telugu”, etc.), and the UI + audio must switch instantly to that language.
+
+Online + Offline implementation:
+• ONLINE MODE:
+  - Use browser or cloud-based speech-to-text, language detection, translation, and text-to-speech APIs.
+  - Automatically configure and securely store required API keys using environment variables (do NOT hardcode keys).
+  - Clearly document where API keys are required and provide placeholders for easy setup.
+
+• OFFLINE MODE:
+  - Implement on-device or locally cached speech recognition, language detection, translation mappings, and text-to-speech voices.
+  - Cache language models, translations, and audio voices using IndexedDB or local storage.
+  - Automatically detect network availability and switch between online and offline pipelines seamlessly without user interaction.
+
+Fallback & reliability:
+If offline support for a detected language is unavailable, gracefully fall back to English while keeping the app fully functional. Include noise filtering, timeout handling, and error recovery so the app never blocks or crashes.
+
+Technical requirements:
+Use only free or free-tier JavaScript or React-based libraries. Ensure responsive UI, accessibility support, fast performance, smooth language transitions, permission handling, and full compatibility across Chrome, Edge, Safari, Android, iOS, desktops, and laptops.
+
+Deliverable expectation:
+Generate clean, modular, well-documented code that clearly separates speech recognition, language detection, translation, audio synthesis, API configuration, and offline fallback logic. The final system should feel invisible, automatic, reliable, and production-ready.
