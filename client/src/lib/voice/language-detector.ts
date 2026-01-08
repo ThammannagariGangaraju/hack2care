@@ -75,6 +75,7 @@ export class LanguageDetector {
       try {
         this.recognition.start();
         this.isListening = true;
+        this.lastTranscript = ""; // Reset transcript on start
         console.log('[LanguageDetector] Started listening for language detection...');
       } catch (err) {
         console.error('[LanguageDetector] Failed to start recognition:', err);
@@ -84,8 +85,8 @@ export class LanguageDetector {
 
   public stop() {
     if (this.recognition && this.isListening) {
+      this.isListening = false; // Set to false before calling stop to prevent auto-restart in onend
       this.recognition.stop();
-      this.isListening = false;
       console.log('[LanguageDetector] Stopped listening.');
     }
   }

@@ -17,35 +17,44 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
   const { language, setLanguage, isAutoDetected, setIsAutoDetected, feedbackMessage, showFeedback } = useLanguage();
 
   useEffect(() => {
-    // Only run detection once on initial load
     if (isAutoDetected) return;
 
+    let detectionPhaseTimeout: NodeJS.Timeout;
+
     languageDetector.setOnDetected((detectedLang: string) => {
+      // Ignore if detection phase is over or if it's the same language
+      if (isAutoDetected) return;
+
       const langCode = detectedLang.split('-')[0];
-      if (langCode !== language) {
+      if (langCode !== 'en') {
+        const switchStartTime = performance.now();
+        console.log(`[LanguageDetector] Detection success: "${langCode}"`);
+        
         setLanguage(langCode);
-        showFeedback(`Language set to ${langCode.toUpperCase()}`);
         setIsAutoDetected(true);
-        // Do not stop for overrides to work, but we could manage state better
+        languageDetector.stop();
+        clearTimeout(detectionPhaseTimeout);
+
+        const switchTime = performance.now() - switchStartTime;
+        console.log(`[LanguageDetector] Switch completion time: ${switchTime.toFixed(2)}ms`);
+        showFeedback(`Language set to ${langCode.toUpperCase()}`);
       }
     });
 
-    // Initial English load first, then start detector after 2 seconds
     const timer = setTimeout(() => {
-      console.log("[HomePage] Starting debounced background language detection...");
+      console.log("[LanguageDetector] Detection phase started (5s max)");
       languageDetector.start();
       showFeedback(translate("home.detecting_language", language), 5000);
       
-      // Auto-stop after 8 seconds if no detection occurred
-      const detectTimer = setTimeout(() => {
+      detectionPhaseTimeout = setTimeout(() => {
         if (!isAutoDetected) {
-          console.log("[HomePage] Detection window closed.");
+          console.log("[LanguageDetector] Detection timeout (5s). Locking to English.");
           languageDetector.stop();
-          setIsAutoDetected(true);
+          setIsAutoDetected(true); // Lock the phase
         }
-      }, 8000);
+      }, 5000);
 
-      return () => clearTimeout(detectTimer);
+      return () => clearTimeout(detectionPhaseTimeout);
     }, 2000);
 
     return () => {
