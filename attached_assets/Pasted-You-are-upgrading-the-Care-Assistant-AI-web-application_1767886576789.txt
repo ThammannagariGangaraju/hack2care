@@ -1,0 +1,21 @@
+You are upgrading the Care-Assistant-AI web application with an advanced automatic multilingual adaptation system that must work in BOTH online and offline modes.
+
+Application behavior:
+When any user opens the app on mobile or desktop, the HOME PAGE must load instantly in English text and English audio by default. The app must not ask the user to speak or show any voice popup. After the UI is fully displayed, the system should quietly initialize microphone access in the background and detect the user’s spoken/native language within 5 seconds.
+
+Language detection & switching:
+Once the spoken language is detected, the application must respond immediately — within 1 second — by automatically translating and converting ALL visible UI text and ALL AI audio outputs into the detected language. This process must be completely automatic and inbuilt, with NO manual dropdowns or buttons for language selection. Background sounds such as music or songs must be ignored; detection should focus only on clear human speech from the device microphone.
+
+Voice override:
+Implement continuous voice command support so the user can override the detected language at any time by simply saying the name of the language they want to read (for example “English”, “Hindi”, “Telugu”, etc.). Even if the system detects one language, it must switch to the user’s preferred reading language immediately when spoken.
+
+Online + Offline support:
+• In ONLINE mode, use browser-based or cloud-assisted JavaScript speech-to-text, language detection, translation, and text-to-speech APIs.
+• In OFFLINE mode, automatically fall back to local/on-device speech recognition models, cached translation dictionaries, and offline text-to-speech voices for supported languages.
+• The app must intelligently detect network availability and switch between online and offline processing seamlessly without user involvement.
+• If a language is not available offline, gracefully fall back to English while keeping the app functional.
+
+Technical requirements:
+Use free and reliable JavaScript or React-based libraries only. Ensure fast performance, responsive UI, accessibility support, noise filtering, permission handling, smooth language transitions, and cross-platform compatibility across Chrome, Edge, Safari, Android, iOS, desktops, and laptops.
+
+The final implementation should feel invisible, automatic, and user-friendly, providing a seamless multilingual experience regardless of internet availability.
