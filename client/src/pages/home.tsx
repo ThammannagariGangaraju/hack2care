@@ -14,20 +14,24 @@ interface HomePageProps {
 
 export default function HomePage({ onStartEmergency, location, locationError }: HomePageProps) {
   const [pulseScale, setPulseScale] = useState(1);
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, isAutoDetected, setIsAutoDetected } = useLanguage();
 
   useEffect(() => {
+    // Only run detection once on initial load
+    if (isAutoDetected) return;
+
     // Initial English load first, then start detector after 2 seconds
     const timer = setTimeout(() => {
-      console.log("[HomePage] Initializing background language detection...");
+      console.log("[HomePage] Starting debounced background language detection...");
       languageDetector.start();
       
-      // For this demo/minimal implementation, we'll simulate a detection
-      // or set a timeout to stop. In a real scenario, the detector would
-      // call setLanguage when it's confident.
+      // Auto-stop after 5 seconds to preserve performance
       const detectTimer = setTimeout(() => {
-        // Fallback or auto-detected logic would go here
-        // languageDetector.stop();
+        if (!isAutoDetected) {
+          console.log("[HomePage] Detection window closed.");
+          languageDetector.stop();
+          setIsAutoDetected(true);
+        }
       }, 5000);
 
       return () => clearTimeout(detectTimer);
@@ -37,7 +41,7 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
       clearTimeout(timer);
       languageDetector.stop();
     };
-  }, [setLanguage]);
+  }, [isAutoDetected, setIsAutoDetected]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
