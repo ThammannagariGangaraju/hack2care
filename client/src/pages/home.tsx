@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { AlertTriangle, Phone, MapPin, Zap, Clock, Heart } from "lucide-react";
 import type { LocationData } from "@shared/schema";
 import logoImage from "@assets/image_1767781744439.png";
+import { useLanguage } from "@/lib/contexts/LanguageContext";
+import { translate } from "@/lib/i18n/translations";
 
 interface HomePageProps {
   onStartEmergency: () => void;
@@ -11,6 +13,7 @@ interface HomePageProps {
 
 export default function HomePage({ onStartEmergency, location, locationError }: HomePageProps) {
   const [pulseScale, setPulseScale] = useState(1);
+  const { language } = useLanguage();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -32,7 +35,7 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
             />
           </div>
           <div>
-            <h1 className="text-white font-bold text-lg tracking-tight">hack2care</h1>
+            <h1 className="text-white font-bold text-lg tracking-tight">{translate("app.title", language)}</h1>
             <p className="text-slate-400 text-xs">AI First-Responder</p>
           </div>
         </div>
@@ -48,7 +51,7 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
       <main className="flex-1 flex flex-col items-center justify-center p-6 gap-6">
         {/* Hero Section */}
         <div className="text-center mb-2">
-          <h2 className="text-white text-2xl font-bold mb-2">Emergency? We're Here.</h2>
+          <h2 className="text-white text-2xl font-bold mb-2">{translate("home.welcome", language)}</h2>
           <p className="text-slate-400 text-sm max-w-xs mx-auto">
             Get instant AI-powered first aid guidance. No login needed.
           </p>
@@ -68,7 +71,7 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
             <div className="bg-white/20 p-4 rounded-full mb-2 backdrop-blur-sm">
               <AlertTriangle className="w-10 h-10" />
             </div>
-            <span className="text-xl font-bold tracking-wide">REPORT ACCIDENT</span>
+            <span className="text-xl font-bold tracking-wide uppercase">{translate("home.report_accident", language)}</span>
             <span className="text-xs font-normal text-red-100 mt-1">Tap for immediate assistance</span>
           </div>
         </button>
