@@ -22,14 +22,16 @@ export class LanguageDetector {
         const last = event.results.length - 1;
         const transcript = event.results[last][0].transcript.toLowerCase().trim();
         const confidence = event.results[last][0].confidence;
-        const detectedLang = event.results[last].language || this.recognition.lang;
+        
+        console.log(`[LanguageDetector] RAW Transcript: "${transcript}" (Confidence: ${confidence})`);
 
         if (transcript === this.lastTranscript) return;
         this.lastTranscript = transcript;
 
-        console.log(`[LanguageDetector] Detection result: "${transcript}" in ${detectedLang} (Confidence: ${confidence})`);
-        
-        // Voice override check
+        // 1. Explicitly infer from recognition.lang if available
+        let detectedLang = event.results[last].language || this.recognition.lang || "en";
+
+        // 2. Basic heuristic for script/language detection
         const languageMap: Record<string, string> = {
           "english": "en",
           "hindi": "hi",
@@ -39,16 +41,28 @@ export class LanguageDetector {
           "malayalam": "ml"
         };
 
+        // Check for specific language keywords (overrides)
+        let overrideLang = null;
         for (const [name, code] of Object.entries(languageMap)) {
           if (transcript.includes(name)) {
-            console.log(`[LanguageDetector] Voice override triggered: "${name}" -> ${code}`);
-            if (this.onDetected) this.onDetected(code);
-            return;
+            overrideLang = code;
+            break;
           }
         }
+
+        // Script detection heuristic (very basic)
+        // Devanagari (Hindi): \u0900-\u097F
+        // Telugu: \u0C00-\u0C7F
+        if (/[\u0900-\u097F]/.test(transcript)) detectedLang = "hi";
+        else if (/[\u0C00-\u0C7F]/.test(transcript)) detectedLang = "te";
+
+        const finalLang = overrideLang || detectedLang.split('-')[0];
+        
+        console.log(`[LanguageDetector] Inferred Language: ${finalLang}`);
         
         if (this.onDetected) {
-          this.onDetected(detectedLang);
+          console.log(`[LanguageDetector] Triggering language switch to: ${finalLang}`);
+          this.onDetected(finalLang);
         }
       };
 
