@@ -21,13 +21,12 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
     if (isAutoDetected) return;
 
     languageDetector.setOnDetected((detectedLang: string) => {
-      // Clean up language code (e.g., 'en-US' -> 'en')
       const langCode = detectedLang.split('-')[0];
       if (langCode !== language) {
         setLanguage(langCode);
         showFeedback(`Language set to ${langCode.toUpperCase()}`);
         setIsAutoDetected(true);
-        languageDetector.stop();
+        // Do not stop for overrides to work, but we could manage state better
       }
     });
 
