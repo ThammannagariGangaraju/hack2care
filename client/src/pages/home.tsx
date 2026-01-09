@@ -88,34 +88,34 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
           </p>
         </div>
 
-        {/* Main Emergency Button */}
         <motion.button
           onClick={onStartEmergency}
           data-testid="button-report-accident"
-          className="w-full max-w-sm h-36 rounded-2xl bg-gradient-to-br from-red-500 via-red-600 to-red-700 text-white font-bold shadow-2xl shadow-red-900/50 transition-all duration-300 flex flex-col items-center justify-center gap-2 relative group"
+          className="w-full max-w-sm h-36 rounded-2xl bg-gradient-to-br from-red-500 via-red-600 to-red-700 text-white font-bold shadow-2xl shadow-red-900/50 flex flex-col items-center justify-center gap-2 relative group overflow-visible"
           animate={{
-            scale: [1, 1.05, 1, 1.05, 1],
+            scale: [1, 1.1, 1, 1.1, 1],
           }}
           transition={{
-            duration: 1.5,
+            duration: 0.8,
             repeat: Infinity,
-            repeatDelay: 0.5,
+            repeatDelay: 1.2,
             ease: "easeInOut",
-            times: [0, 0.2, 0.4, 0.6, 1]
+            times: [0, 0.15, 0.3, 0.45, 0.6]
           }}
         >
           {/* Glow effect */}
           <motion.div 
-            className="absolute -inset-1 bg-red-500/30 rounded-2xl blur-xl opacity-70 group-hover:opacity-100 transition-opacity"
+            className="absolute -inset-2 bg-red-500/40 rounded-2xl blur-2xl opacity-70 group-hover:opacity-100"
             animate={{
-              opacity: [0.4, 0.8, 0.4, 0.8, 0.4],
+              opacity: [0.4, 0.9, 0.4, 0.9, 0.4],
+              scale: [1, 1.2, 1, 1.2, 1],
             }}
             transition={{
-              duration: 1.5,
+              duration: 0.8,
               repeat: Infinity,
-              repeatDelay: 0.5,
+              repeatDelay: 1.2,
               ease: "easeInOut",
-              times: [0, 0.2, 0.4, 0.6, 1]
+              times: [0, 0.15, 0.3, 0.45, 0.6]
             }}
           />
           
