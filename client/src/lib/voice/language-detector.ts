@@ -10,75 +10,88 @@ export class LanguageDetector {
   private lastTranscript: string = "";
 
   constructor() {
-    // Check for Web Speech API support
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     
     if (SpeechRecognition) {
       this.recognition = new SpeechRecognition();
       this.recognition.continuous = true;
-      this.recognition.interimResults = false;
+      this.recognition.interimResults = true;
       
       this.recognition.onresult = (event: any) => {
         const last = event.results.length - 1;
-        const transcript = event.results[last][0].transcript.trim();
+        const transcript = event.results[last][0].transcript.trim().toLowerCase();
         
-        console.log(`[LanguageDetector] RAW Input: "${transcript}"`);
-
         if (!transcript || transcript === this.lastTranscript) return;
-        this.lastTranscript = transcript;
-
-        let detectedLang = "en"; // Default
-
-        // Direct script-based heuristics for immediate inference
-        if (/[\u0C00-\u0C7F]/.test(transcript)) {
-          detectedLang = "te";
-        } else if (/[\u0900-\u097F]/.test(transcript)) {
-          detectedLang = "hi";
-        }
-
-        console.log(`[LanguageDetector] Immediate Inference: ${detectedLang}`);
         
-        if (this.onDetected) {
-          this.onDetected(detectedLang);
+        // Start detection window on first speech
+        if (!this.lastTranscript && !this.detectionTimer) {
+          console.log('[LanguageDetector] First speech detected, starting 5s window...');
+          this.detectionTimer = setTimeout(() => {
+            this.finalizeDetection();
+          }, 5000);
         }
+
+        this.lastTranscript = transcript;
+        console.log(`[LanguageDetector] Transcript: "${transcript}"`);
+
+        // Immediate override by language names
+        if (transcript.includes('english')) this.applyDetection('en');
+        else if (transcript.includes('hindi') || transcript.includes('हिंदी')) this.applyDetection('hi');
+        else if (transcript.includes('telugu') || transcript.includes('తెలుగు')) this.applyDetection('te');
+        else if (transcript.includes('spanish') || transcript.includes('español')) this.applyDetection('es');
+        
+        // Script heuristics (check immediately)
+        if (/[\u0C00-\u0C7F]/.test(transcript)) this.applyDetection('te');
+        else if (/[\u0900-\u097F]/.test(transcript)) this.applyDetection('hi');
       };
 
       this.recognition.onerror = (event: any) => {
-        console.error('[LanguageDetector] Speech recognition error:', event.error);
+        console.error('[LanguageDetector] Speech error:', event.error);
+        if (event.error === 'no-speech') this.finalizeDetection();
       };
 
       this.recognition.onend = () => {
-        if (this.isListening) {
-          this.recognition.start(); // Auto-restart if we're supposed to be listening
-        }
+        if (this.isListening) this.recognition.start();
       };
-    } else {
-      console.warn('[LanguageDetector] Web Speech API is not supported in this browser.');
     }
   }
 
-  public setOnDetected(cb: (lang: string) => void) {
-    this.onDetected = cb;
+  private applyDetection(lang: string) {
+    if (this.onDetected) {
+      console.log(`[LanguageDetector] Detected: ${lang}`);
+      this.onDetected(lang);
+      this.stop();
+    }
   }
+
+  private finalizeDetection() {
+    if (this.isListening) {
+      console.log('[LanguageDetector] Window closed, defaulting to English if no switch occurred');
+      this.applyDetection('en');
+    }
+  }
+
+  private detectionTimer: any = null;
 
   public start() {
     if (this.recognition && !this.isListening) {
       try {
         this.recognition.start();
         this.isListening = true;
-        this.lastTranscript = ""; // Reset transcript on start
-        console.log('[LanguageDetector] Started listening for language detection...');
+        this.lastTranscript = "";
+        this.detectionTimer = null;
+        console.log('[LanguageDetector] Listening silently...');
       } catch (err) {
-        console.error('[LanguageDetector] Failed to start recognition:', err);
+        console.error('[LanguageDetector] Start failed:', err);
       }
     }
   }
 
   public stop() {
-    if (this.recognition && this.isListening) {
-      this.isListening = false; // Set to false before calling stop to prevent auto-restart in onend
-      this.recognition.stop();
-      console.log('[LanguageDetector] Stopped listening.');
+    this.isListening = false;
+    if (this.detectionTimer) clearTimeout(this.detectionTimer);
+    if (this.recognition) {
+      try { this.recognition.stop(); } catch {}
     }
   }
 
@@ -87,6 +100,10 @@ export class LanguageDetector {
       this.recognition.lang = langCode;
       console.log(`[LanguageDetector] Recognition language set to: ${langCode}`);
     }
+  }
+
+  public setOnDetected(cb: (lang: string) => void) {
+    this.onDetected = cb;
   }
 }
 

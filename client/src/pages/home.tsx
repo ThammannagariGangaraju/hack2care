@@ -21,23 +21,20 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
 
     languageDetector.setOnDetected((detectedLang: string) => {
       const langCode = detectedLang.split('-')[0];
-      console.log(`[LanguageDetector] Session adaptation triggered: "${langCode}"`);
+      console.log(`[LanguageDetector] Switch triggered: ${langCode}`);
       
       setLanguage(langCode);
       setIsAutoDetected(true);
-      showFeedback(`Language set to ${langCode.toUpperCase()}`);
+      showFeedback(`Language: ${langCode.toUpperCase()}`);
     });
 
-    const timer = setTimeout(() => {
-      console.log("[LanguageDetector] Background adaptation listening active...");
-      languageDetector.start();
-    }, 2000);
+    // Start recognition immediately but it waits for speech internally
+    languageDetector.start();
 
     return () => {
-      clearTimeout(timer);
       languageDetector.stop();
     };
-  }, [isAutoDetected, setIsAutoDetected, setLanguage, language, showFeedback]);
+  }, [isAutoDetected, setIsAutoDetected, setLanguage, showFeedback]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
