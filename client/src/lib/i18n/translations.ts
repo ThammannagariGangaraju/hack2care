@@ -49,6 +49,32 @@ export const translations: Record<string, Record<string, string>> = {
 };
 
 /**
+ * Dynamic translation using server-side Gemini API with local fallback.
+ */
+export async function translateDynamic(targetLang: string): Promise<void> {
+  if (targetLang === 'en') return;
+
+  try {
+    const response = await fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: translations.en,
+        targetLang
+      })
+    });
+
+    if (response.ok) {
+      const translated = await response.json();
+      translations[targetLang] = { ...translations[targetLang], ...translated };
+      console.log(`[Translations] Successfully updated ${targetLang} via Gemini`);
+    }
+  } catch (error) {
+    console.warn(`[Translations] Gemini translation failed for ${targetLang}, using local fallback`);
+  }
+}
+
+/**
  * Hook or function to get translated string based on current language.
  */
 export function translate(key: string, lang: string): string {

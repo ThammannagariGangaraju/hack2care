@@ -22,9 +22,9 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return meters < 1000 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`;
 }
 
-// Initialize Gemini AI client using Replit AI Integrations
+  // Initialize Gemini AI client using Replit AI Integrations
 const ai = new GoogleGenAI({
-  apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY || "",
+  apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY || process.env.GEMINI_API_KEY || "",
   httpOptions: {
     apiVersion: "",
     baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || "",
@@ -35,6 +35,40 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  // Translate text using Gemini
+  app.post("/api/translate", async (req, res) => {
+    try {
+      const { text, targetLang } = req.body;
+      if (!text || !targetLang) {
+        return res.status(400).json({ error: "Missing text or targetLang" });
+      }
+
+      const prompt = `Translate the following JSON object values into ${targetLang}. Keep the keys exactly the same.
+Return ONLY the translated JSON object, no other text or markdown.
+
+JSON to translate:
+${JSON.stringify(text)}`;
+
+      const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      let cleanText = response.text().trim();
+      
+      // Clean up markdown blocks if present
+      if (cleanText.startsWith('```json')) {
+        cleanText = cleanText.replace(/```json\n?/, '').replace(/\n?```$/, '');
+      } else if (cleanText.startsWith('```')) {
+        cleanText = cleanText.replace(/```\n?/, '').replace(/\n?```$/, '');
+      }
+
+      const translated = JSON.parse(cleanText);
+      res.json(translated);
+    } catch (error) {
+      console.error("Translation error:", error);
+      res.status(500).json({ error: "Translation failed" });
+    }
+  });
+
   // Log emergency
   app.post("/api/emergencies", async (req, res) => {
     try {

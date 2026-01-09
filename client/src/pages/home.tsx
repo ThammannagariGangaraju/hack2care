@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import type { LocationData } from "@shared/schema";
 import logoImage from "@assets/image_1767781744439.png";
 import { useLanguage } from "@/lib/contexts/LanguageContext";
-import { translate } from "@/lib/i18n/translations";
+import { translate, translateDynamic } from "@/lib/i18n/translations";
 import { languageDetector } from "@/lib/voice/language-detector";
 
 interface HomePageProps {
@@ -19,12 +19,22 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
   useEffect(() => {
     if (isAutoDetected) return;
 
-    languageDetector.setOnDetected((detectedLang: string) => {
+    languageDetector.setOnDetected(async (detectedLang: string) => {
       const langCode = detectedLang.split('-')[0];
       console.log(`[LanguageDetector] Switch triggered: ${langCode}`);
       
+      // Update UI language immediately
       setLanguage(langCode);
       setIsAutoDetected(true);
+      
+      // Trigger dynamic translation for UI content
+      if (langCode !== 'en') {
+        translateDynamic(langCode).then(() => {
+          // Force UI refresh if needed by re-setting language (it will be caught by React)
+          setLanguage(langCode);
+        });
+      }
+      
       showFeedback(`Language: ${langCode.toUpperCase()}`);
     });
 
