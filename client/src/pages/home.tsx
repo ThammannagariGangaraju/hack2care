@@ -92,27 +92,14 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
           </p>
         </div>
 
-        <motion.button
-          onClick={onStartEmergency}
-          data-testid="button-report-accident"
-          className="w-full max-w-sm h-36 rounded-2xl bg-gradient-to-br from-red-500 via-red-600 to-red-700 text-white font-bold shadow-2xl shadow-red-900/50 flex flex-col items-center justify-center gap-2 relative group overflow-visible"
-          animate={{
-            scale: [1, 1.1, 1, 1.1, 1],
-          }}
-          transition={{
-            duration: 0.8,
-            repeat: Infinity,
-            repeatDelay: 1.2,
-            ease: "easeInOut",
-            times: [0, 0.15, 0.3, 0.45, 0.6]
-          }}
-        >
-          {/* Glow effect */}
-          <motion.div 
-            className="absolute -inset-2 bg-red-500/40 rounded-2xl blur-2xl opacity-70 group-hover:opacity-100"
+        {/* Main Emergency Button */}
+        <div className="w-full max-w-sm flex flex-col gap-4">
+          <motion.button
+            onClick={onStartEmergency}
+            data-testid="button-report-accident"
+            className="w-full h-36 rounded-2xl bg-gradient-to-br from-red-500 via-red-600 to-red-700 text-white font-bold shadow-2xl shadow-red-900/50 flex flex-col items-center justify-center gap-2 relative group overflow-visible"
             animate={{
-              opacity: [0.4, 0.9, 0.4, 0.9, 0.4],
-              scale: [1, 1.2, 1, 1.2, 1],
+              scale: [1, 1.1, 1, 1.1, 1],
             }}
             transition={{
               duration: 0.8,
@@ -121,16 +108,53 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
               ease: "easeInOut",
               times: [0, 0.15, 0.3, 0.45, 0.6]
             }}
-          />
-          
-          <div className="relative z-10 flex flex-col items-center">
-            <div className="bg-white/20 p-4 rounded-full mb-2 backdrop-blur-sm">
-              <AlertTriangle className="w-10 h-10" />
+          >
+            {/* Glow effect */}
+            <motion.div 
+              className="absolute -inset-2 bg-red-500/40 rounded-2xl blur-2xl opacity-70 group-hover:opacity-100"
+              animate={{
+                opacity: [0.4, 0.9, 0.4, 0.9, 0.4],
+                scale: [1, 1.2, 1, 1.2, 1],
+              }}
+              transition={{
+                duration: 0.8,
+                repeat: Infinity,
+                repeatDelay: 1.2,
+                ease: "easeInOut",
+                times: [0, 0.15, 0.3, 0.45, 0.6]
+              }}
+            />
+            
+            <div className="relative z-10 flex flex-col items-center">
+              <div className="bg-white/20 p-4 rounded-full mb-2 backdrop-blur-sm">
+                <AlertTriangle className="w-10 h-10" />
+              </div>
+              <span className="text-xl font-bold tracking-wide uppercase">{translate("home.report_accident", language)}</span>
+              <span className="text-xs font-normal text-red-100 mt-1">Tap for immediate assistance</span>
             </div>
-            <span className="text-xl font-bold tracking-wide uppercase">{translate("home.report_accident", language)}</span>
-            <span className="text-xs font-normal text-red-100 mt-1">Tap for immediate assistance</span>
+          </motion.button>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                showFeedback("Translating to Hindi...");
+                translateDynamic('hi').then(() => setLanguage('hi'));
+              }}
+              className="flex-1 py-2 px-3 rounded-lg bg-slate-800 border border-slate-700 text-white text-xs font-medium hover:bg-slate-700 transition-colors"
+            >
+              Demo: Translate Hindi
+            </button>
+            <button
+              onClick={() => {
+                showFeedback("Translating to Telugu...");
+                translateDynamic('te').then(() => setLanguage('te'));
+              }}
+              className="flex-1 py-2 px-3 rounded-lg bg-slate-800 border border-slate-700 text-white text-xs font-medium hover:bg-slate-700 transition-colors"
+            >
+              Demo: Translate Telugu
+            </button>
           </div>
-        </motion.button>
+        </div>
 
         {/* Features Row */}
         <div className="grid grid-cols-3 gap-3 w-full max-w-sm mt-2">
