@@ -40,7 +40,6 @@ export class LanguageDetector {
         
         if (this.onDetected) {
           this.onDetected(detectedLang);
-          this.stop(); // Lock and stop after first valid input
         }
       };
 

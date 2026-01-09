@@ -20,14 +20,11 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
     if (isAutoDetected) return;
 
     languageDetector.setOnDetected((detectedLang: string) => {
-      if (isAutoDetected) return;
-
       const langCode = detectedLang.split('-')[0];
       console.log(`[LanguageDetector] Session adaptation triggered: "${langCode}"`);
       
       setLanguage(langCode);
       setIsAutoDetected(true);
-      languageDetector.stop();
       showFeedback(`Language set to ${langCode.toUpperCase()}`);
     });
 
