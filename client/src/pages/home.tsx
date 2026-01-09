@@ -133,27 +133,6 @@ export default function HomePage({ onStartEmergency, location, locationError }: 
               <span className="text-xs font-normal text-red-100 mt-1">Tap for immediate assistance</span>
             </div>
           </motion.button>
-
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                showFeedback("Translating to Hindi...");
-                translateDynamic('hi').then(() => setLanguage('hi'));
-              }}
-              className="flex-1 py-2 px-3 rounded-lg bg-slate-800 border border-slate-700 text-white text-xs font-medium hover:bg-slate-700 transition-colors"
-            >
-              Demo: Translate Hindi
-            </button>
-            <button
-              onClick={() => {
-                showFeedback("Translating to Telugu...");
-                translateDynamic('te').then(() => setLanguage('te'));
-              }}
-              className="flex-1 py-2 px-3 rounded-lg bg-slate-800 border border-slate-700 text-white text-xs font-medium hover:bg-slate-700 transition-colors"
-            >
-              Demo: Translate Telugu
-            </button>
-          </div>
         </div>
 
         {/* Features Row */}
